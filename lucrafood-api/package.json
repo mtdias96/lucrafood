@@ -1,0 +1,35 @@
+{
+  "name": "lucrafood",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "tsx watch src/index.ts",
+    "db:generate": "npx drizzle-kit generate",
+    "db:push": "npx drizzle-kit push"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.19.0",
+  "devDependencies": {
+    "@eslint/js": "^9.39.2",
+    "@types/node": "^25.0.9",
+    "@types/pg": "^8.16.0",
+    "drizzle-kit": "^0.31.8",
+    "eslint": "^9.39.2",
+    "globals": "^17.0.0",
+    "jiti": "^2.6.1",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.53.0"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "drizzle-orm": "^0.45.1",
+    "fastify": "^5.7.1",
+    "pg": "^8.17.1",
+    "zod": "^4.3.5"
+  }
+}
