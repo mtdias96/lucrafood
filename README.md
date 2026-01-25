@@ -36,3 +36,16 @@ O projeto é um **MVP de portfólio** com **API + Web Admin + App Mobile (React 
 
 ---
 
+## 🗺️ Roadmap (Backend)
+
+O backlog está organizado por fases:
+
+- **Fase 0** — Fundação do Backend  (Em andamento)
+- **Fase 1** — Autenticação e Usuários  
+- **Fase 2** — Ingredientes + Histórico de Preços  
+- **Fase 3** — Produtos + Receitas  
+- **Fase 4** — Cálculo de Custos e Margem  
+- **Fase 5** — Dashboard e Insights  
+- **Fase 6** — Gráficos  
+- **Fase 7** — Plano Pro (Mock)  
+- **Fase 8** — Qualidade e Produção  
