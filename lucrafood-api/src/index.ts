@@ -5,23 +5,26 @@ import fastifyJwt from '@fastify/jwt';
 import Fastify from 'fastify';
 
 import { ZodError } from 'zod';
+import { ErrorCode } from './application/errors/ErrorCode';
+import { HttpError } from './application/errors/http/HttpError';
 import { routes } from './application/routes';
-import { AppError } from './kernel/errors/AppError';
 
 const fastify = Fastify();
 
 fastify.setErrorHandler((error, request, reply) => {
   if (error instanceof ZodError) {
     return reply.code(400).send({
-      message: 'Validation error',
-      issues: error.issues.map((i) => ({
-        path: i.path.join('.'),
-        message: i.message,
-      })),
+      Error: {
+        code: ErrorCode.VALIDATION,
+        message: error.issues.map((issue) => ({
+          field: issue.path.join('.'),
+          error: issue.message,
+        })),
+      },
     });
   }
 
-  if (error instanceof AppError) {
+  if (error instanceof HttpError) {
     return reply.code(error.statusCode).send({
       message: error.message,
       code: error.code,
@@ -29,7 +32,8 @@ fastify.setErrorHandler((error, request, reply) => {
   }
 
   return reply.code(500).send({
-    message: 'Internal server error',
+    code: ErrorCode.INTERNAL_SERVER_ERROR,
+    message: 'Internal server error.',
   });
 });
 

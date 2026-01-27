@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "dev": "tsx watch src/index.ts",
+    "dev": "ts-node-dev --respawn --transpile-only --files -r tsconfig-paths/register src/index.ts",
     "db:generate": "npx drizzle-kit generate",
     "db:push": "npx drizzle-kit push"
   },
@@ -21,6 +21,9 @@
     "eslint": "^9.39.2",
     "globals": "^17.0.0",
     "jiti": "^2.6.1",
+    "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0",
+    "tsconfig-paths": "^4.2.0",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.53.0"

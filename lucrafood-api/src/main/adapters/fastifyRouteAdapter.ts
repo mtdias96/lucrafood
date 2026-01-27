@@ -1,4 +1,5 @@
-import { Controller } from '@/application/contracts/Controller';
+
+import { Controller } from '@application/contracts/Controller';
 import { FastifyReply, FastifyRequest, RouteHandlerMethod } from 'fastify';
 
 export function fastifyRouteAdapter<TBody = undefined>(
