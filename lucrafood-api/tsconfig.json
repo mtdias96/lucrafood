@@ -8,17 +8,30 @@
       "ESNext.Collection",
       "ESNext.Iterator"
     ],
-    "module": "nodenext",
     "target": "es2022",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "moduleResolution": "node16",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
+    "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "./src/*"
+      "@application/*": [
+        "src/application/*"
+      ],
+      "@kernel/*": [
+        "src/kernel/*"
+      ],
+      "@main/*": [
+        "src/main/*"
+      ],
+      "@infra/*": [
+        "src/infra/*"
+      ],
+      "@shared/*": [
+        "src/shared/*"
       ]
     }
   }
