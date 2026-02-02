@@ -4,7 +4,7 @@ import { AppConfig } from '@shared/config/AppConfig';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
 
-import * as schema from '../schemas/index';
+import * as schema from './schemas/index';
 
 @Injectable()
 export class DrizzleClient {
