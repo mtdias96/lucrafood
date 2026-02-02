@@ -1,48 +1,27 @@
 import 'dotenv/config';
 import 'reflect-metadata';
 
-import fastifyJwt from '@fastify/jwt';
 import Fastify from 'fastify';
 
-import { ZodError } from 'zod';
-import { ErrorCode } from './application/errors/ErrorCode';
-import { HttpError } from './application/errors/http/HttpError';
-import { routes } from './application/routes';
+import { errorHandlerPlugin } from '@main/plugins/errorHandler';
+import { jwtPlugin } from '@main/plugins/jwtPlugin';
+import { routes } from '@main/routes';
 
-const fastify = Fastify();
+async function bootstrap() {
+  const fastify = Fastify({ logger: true });
 
-fastify.setErrorHandler((error, request, reply) => {
-  if (error instanceof ZodError) {
-    return reply.code(400).send({
-      Error: {
-        code: ErrorCode.VALIDATION,
-        message: error.issues.map((issue) => ({
-          field: issue.path.join('.'),
-          error: issue.message,
-        })),
-      },
-    });
-  }
+  await fastify.register(errorHandlerPlugin);
 
-  if (error instanceof HttpError) {
-    return reply.code(error.statusCode).send({
-      message: error.message,
-      code: error.code,
-    });
-  }
+  await fastify.register(jwtPlugin);
 
-  return reply.code(500).send({
-    code: ErrorCode.INTERNAL_SERVER_ERROR,
-    message: 'Internal server error.',
-  });
-});
+  await fastify.register(routes, { prefix: '/api' });
 
-fastify.register(fastifyJwt, {
-  secret: 'superSecret',
-});
+  await fastify.listen({ port: 3333, host: '0.0.0.0' });
 
-fastify.register(routes, { prefix: 'api' });
+  console.log('🔥 Server started at http://localhost:3333');
+}
 
-fastify.listen({ port: 3333, host: '0.0.0.0' }, () => {
-  console.log('🔥 Server at started in http://localhost:3333');
+bootstrap().catch((error) => {
+  console.error(error);
+  process.exit(1);
 });
