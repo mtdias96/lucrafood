@@ -1,7 +1,8 @@
 import { compare } from 'bcrypt';
 
 import { Unauthorized } from '@application/errors/http/Unauthorization';
-import { AccountRepository } from '@infra/database/repository/AccountRepository';
+
+import { AccountRepository } from '@infra/database/drizzle/repository/AccountRepository';
 import { JwtProvider } from '@infra/security/JwtProvider';
 import { Injectable } from '@kernel/decorators/Injactable';
 

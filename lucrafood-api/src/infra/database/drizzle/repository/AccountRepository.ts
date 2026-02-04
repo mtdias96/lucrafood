@@ -2,7 +2,8 @@
 import { Account } from '@application/entities/Account';
 import { Injectable } from '@kernel/decorators/Injactable';
 import { eq } from 'drizzle-orm';
-import { DrizzleClient } from '../drizzle/Client';
+
+import { DrizzleClient } from '../Client';
 import { AccountMapper } from '../mappers/AccountMapper';
 import { accountsTable } from '../schemas';
 
