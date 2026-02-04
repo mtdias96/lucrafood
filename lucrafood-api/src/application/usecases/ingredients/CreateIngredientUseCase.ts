@@ -2,7 +2,7 @@
 import { Ingredient } from '@application/entities/Ingredient';
 import { Conflict } from '@application/errors/http/NotFound';
 import { IngredientUnit } from '@application/types/ingredientUnit';
-import { IngredientRepository } from '@infra/database/drizzle/repository/IngredientRepository';
+import { IngredientRepository } from '@infra/database/drizzle/repository/ingredients/IngredientRepository';
 
 import { Injectable } from '@kernel/decorators/Injactable';
 

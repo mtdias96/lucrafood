@@ -3,8 +3,8 @@ import { Injectable } from '@kernel/decorators/Injactable';
 import { and, eq } from 'drizzle-orm';
 
 import { Ingredient } from '@application/entities/Ingredient';
-import { DrizzleClient } from '../Client';
-import { ingredientsTable } from '../schemas';
+import { DrizzleClient } from '../../Client';
+import { ingredientsTable } from '../../schemas';
 
 @Injectable()
 export class IngredientRepository {

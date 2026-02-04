@@ -15,6 +15,20 @@
       "when": 1770042267462,
       "tag": "0001_sweet_prowler",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1770216292372,
+      "tag": "0002_spicy_phil_sheldon",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1770216370767,
+      "tag": "0003_eager_power_pack",
+      "breakpoints": true
     }
   ]
 }
