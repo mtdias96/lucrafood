@@ -41,3 +41,14 @@ export const ingredientPrices = pgTable('ingredient_prices', {
     .notNull()
     .defaultNow(),
 });
+
+export const ingredientStoresTable = pgTable('ingredientStores', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  ingredientId: uuid('ingredient_id').notNull().references(() => ingredientsTable.id, { onDelete: 'cascade' }),
+
+  name: text('name').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+},
+);
