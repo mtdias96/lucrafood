@@ -1,54 +1,26 @@
-import { numeric, pgEnum, pgTable, text, timestamp, uniqueIndex, uuid } from 'drizzle-orm/pg-core';
-import { accountsTable } from './accounts';
-import { storesTable } from './stores';
 
-export const ingredientUnitEnum = pgEnum('ingredient_unit', ['g', 'ml', 'un', 'kg', 'l']);
+import { pgTable, text, timestamp, uniqueIndex, uuid } from 'drizzle-orm/pg-core';
+import { unitEnum } from '../enums/Unit';
+import { accounts } from './accounts';
 
-export const ingredientsTable = pgTable('ingredients', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  accountId: uuid('account_id').notNull().references(() => accountsTable.id, { onDelete: 'cascade' }),
+export const ingredients = pgTable(
+  'ingredients',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    accountId: uuid('account_id')
+      .notNull()
+      .references(() => accounts.id, { onDelete: 'cascade' }),
 
-  name: text('name').notNull(),
-  unit: ingredientUnitEnum('unit').notNull(),
+    name: text('name').notNull(),
 
-  createdAt: timestamp('created_at', { withTimezone: true })
-    .notNull()
-    .defaultNow(),
-},
+    baseUnit: unitEnum('base_unit').notNull(),
+
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
   (t) => ([
-    uniqueIndex('ingredients_user_name_uq').on(t.accountId, t.name),
+    uniqueIndex('uniq_ingredient_name_by_account').on(
+      t.accountId,
+      t.name,
+    ),
   ]),
-);
-
-export const ingredientPrices = pgTable('ingredient_prices', {
-  id: uuid('id').primaryKey().defaultRandom(),
-
-  ingredientId: uuid('ingredient_id')
-    .notNull()
-    .references(() => ingredientsTable.id, { onDelete: 'cascade' }),
-
-  storeId: uuid('store_id')
-    .notNull()
-    .references(() => storesTable.id, { onDelete: 'restrict' }),
-
-  priceTotal: numeric('price_total', { precision: 12, scale: 2 }).notNull(),
-  quantity: numeric('quantity', { precision: 12, scale: 3 }).notNull(),
-  unitPrice: numeric('unit_price', { precision: 12, scale: 6 }).notNull(),
-
-  purchasedAt: timestamp('purchased_at', { withTimezone: true }).notNull(),
-
-  createdAt: timestamp('created_at', { withTimezone: true })
-    .notNull()
-    .defaultNow(),
-});
-
-export const ingredientStoresTable = pgTable('ingredientStores', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  ingredientId: uuid('ingredient_id').notNull().references(() => ingredientsTable.id, { onDelete: 'cascade' }),
-
-  name: text('name').notNull(),
-  createdAt: timestamp('created_at', { withTimezone: true })
-    .notNull()
-    .defaultNow(),
-},
 );
