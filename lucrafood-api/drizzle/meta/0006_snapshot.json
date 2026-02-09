@@ -1,0 +1,28 @@
+{
+  "id": "3973fdf4-79c5-42ce-bad1-1f1e7a6fdca9",
+  "prevId": "de76accb-ae5e-4aa9-aa61-f4177348a792",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {},
+  "enums": {
+    "public.unit": {
+      "name": "unit",
+      "schema": "public",
+      "values": [
+        "g",
+        "ml",
+        "un"
+      ]
+    }
+  },
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}
