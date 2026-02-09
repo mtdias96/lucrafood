@@ -1,18 +1,22 @@
-import { IngredientUnit } from '@application/types/ingredientUnit';
+import { PackageUnit } from '@shared/types/PackageUnit';
 import { randomUUID } from 'node:crypto';
 
 export class Ingredient {
   readonly id: string;
+  readonly accountId: string;
+
   readonly name: string;
+  baseUnit: PackageUnit;
+
   readonly createdAt: Date;
-  accountId: string;
-  unit: IngredientUnit;
 
   constructor(attrs: Ingredient.Attributes) {
     this.id = attrs.id ?? randomUUID().toString();
     this.accountId = attrs.accountId;
+
     this.name = attrs.name;
-    this.unit = attrs.unit;
+    this.baseUnit = attrs.baseUnit;
+
     this.createdAt = attrs.createdAt ?? new Date();
 
   }
@@ -22,7 +26,7 @@ export namespace Ingredient {
     id?: string
     name: string;
     accountId: string;
-    unit: IngredientUnit
+    baseUnit: PackageUnit
     createdAt?: Date;
   };
 

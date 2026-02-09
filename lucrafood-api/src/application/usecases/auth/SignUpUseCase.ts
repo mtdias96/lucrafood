@@ -1,7 +1,8 @@
 
 import { Account } from '@application/entities/Account';
-import { Conflict } from '@application/errors/http/NotFound';
+import { Conflict } from '@application/errors/http/Conflict';
 import { AccountRepository } from '@infra/database/drizzle/repository/AccountRepository';
+;
 
 import { JwtProvider } from '@infra/security/JwtProvider';
 import { Injectable } from '@kernel/decorators/Injactable';

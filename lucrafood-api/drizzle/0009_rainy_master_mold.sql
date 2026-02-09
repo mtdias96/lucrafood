@@ -1,0 +1,1 @@
+ALTER TABLE "ingredient_purchases" ALTER COLUMN "store_id" DROP NOT NULL;

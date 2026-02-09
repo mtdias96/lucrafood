@@ -1,8 +1,8 @@
 import { Account } from '@application/entities/Account';
-import { accountsTable } from '../schemas';
+import { accounts } from '../schemas';
 
 export class AccountMapper {
-  static toRow(entity: Account): typeof accountsTable.$inferInsert {
+  static toRow(entity: Account): typeof accounts.$inferInsert {
     return {
       id: entity.id,
       name: entity.name,
@@ -12,7 +12,7 @@ export class AccountMapper {
     };
   }
 
-  static toEntity(row: typeof accountsTable.$inferSelect): Account {
+  static toEntity(row: typeof accounts.$inferSelect): Account {
     return new Account({
       id: row.id,
       name: row.name,
