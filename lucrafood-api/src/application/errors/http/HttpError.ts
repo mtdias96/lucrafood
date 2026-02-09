@@ -4,7 +4,7 @@ export abstract class HttpError extends Error {
   public abstract statusCode: number;
   public abstract code: ErrorCode;
 
-  constructor(message: string) {
+  constructor(message?: string) {
     super(message);
     this.name = this.constructor.name;
 
