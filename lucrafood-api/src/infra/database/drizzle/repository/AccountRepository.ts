@@ -5,7 +5,7 @@ import { eq } from 'drizzle-orm';
 
 import { DrizzleClient } from '../Client';
 import { AccountMapper } from '../mappers/AccountMapper';
-import { accountsTable } from '../schemas';
+import { accounts } from '../schemas';
 
 @Injectable()
 export class AccountRepository {
@@ -14,14 +14,14 @@ export class AccountRepository {
   async findByEmail(email: string): Promise<Account | null> {
     const [row] = await this.db.client
       .select()
-      .from(accountsTable)
-      .where(eq(accountsTable.email, email))
+      .from(accounts)
+      .where(eq(accounts.email, email))
       .limit(1);
 
     return row ? AccountMapper.toEntity(row) : null;
   }
 
   async create(account: Account): Promise<void> {
-    await this.db.client.insert(accountsTable).values(AccountMapper.toRow(account));
+    await this.db.client.insert(accounts).values(AccountMapper.toRow(account));
   }
 }
