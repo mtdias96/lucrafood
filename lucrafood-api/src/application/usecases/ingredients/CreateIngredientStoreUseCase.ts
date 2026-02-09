@@ -1,6 +1,6 @@
 
 import { IngredientStore } from '@application/entities/IngredientStore';
-import { Conflict } from '@application/errors/http/NotFound';
+import { Conflict } from '@application/errors/http/Conflict';
 import { IngredientStoreRepository } from '@infra/database/drizzle/repository/ingredients/IngredientStoreRepository';
 
 import { Injectable } from '@kernel/decorators/Injactable';
@@ -13,19 +13,19 @@ export class CreateIngredientStoreUseCase {
   ) { };
 
   async execute(input: CreateIngredientStoreUseCase.Input): Promise<CreateIngredientStoreUseCase.Output> {
-    const { name, ingredientId } = input;
-    const ingredientAlreadyExists = await this.ingredientStoreRepository.findByName(name, ingredientId);
+    const { name, accountId } = input;
+    const storeAlreadyExists = await this.ingredientStoreRepository.findByName({ name, accountId });
 
-    if (ingredientAlreadyExists) { throw new Conflict('Store is already exists'); }
+    if (storeAlreadyExists) { throw new Conflict('Store is already exists'); }
 
-    const ingredientStore = new IngredientStore({ name, ingredientId });
+    const ingredientStore = new IngredientStore({ name, accountId });
+
     const created = await this.ingredientStoreRepository.create(ingredientStore);
 
     return {
-      ingredientStore: {
+      store: {
         id: created.id,
         name: created.name,
-        ingredientId: created.ingredientId,
         createdAt: created.createdAt,
       },
     };
@@ -34,14 +34,13 @@ export class CreateIngredientStoreUseCase {
 
 export namespace CreateIngredientStoreUseCase {
   export type Input = {
-    ingredientId: string;
     name: string;
+    accountId: string
   }
 
   export type Output = {
-    ingredientStore: {
+    store: {
       id: string,
-      ingredientId: string;
       name: string,
       createdAt: Date
     }
