@@ -47,6 +47,6 @@ export class IngredientRepository {
       throw new DbError('DB_INSERT_FAILED: ingredient returned no row');
     }
 
-    return created ?? null;
+    return created;
   }
 }
