@@ -5,6 +5,7 @@ import { randomUUID } from 'node:crypto';
 export class IngredientPurchase {
   readonly id: string;
   readonly ingredientId: string;
+  readonly accountId: string;
   readonly storeId?: string | null | undefined;
 
   readonly packageQty: number;
@@ -19,6 +20,7 @@ export class IngredientPurchase {
     this.id = attrs.id ?? randomUUID();
 
     this.ingredientId = attrs.ingredientId;
+    this.accountId = attrs.accountId;
     this.storeId = attrs.storeId;
 
     this.packageQty = attrs.packageQty;
@@ -36,6 +38,7 @@ export namespace IngredientPurchase {
     id?: string;
 
     ingredientId: string;
+    accountId: string;
     storeId?: string | null;
 
     packageQty: number;
