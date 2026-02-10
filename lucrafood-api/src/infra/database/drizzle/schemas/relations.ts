@@ -3,7 +3,8 @@ import { relations } from 'drizzle-orm';
 import { accounts } from './accounts';
 import { ingredients } from './ingredients';
 import { ingredientPurchases } from './ingredientsPurchase';
-import { productRecipeItems } from './productRecipe';
+
+import { productRecipeItems } from './productRecipeItems';
 import { products } from './products';
 import { stores } from './store';
 
