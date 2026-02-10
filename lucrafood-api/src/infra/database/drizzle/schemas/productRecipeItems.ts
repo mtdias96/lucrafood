@@ -1,5 +1,6 @@
 import { numeric, pgTable, timestamp, uniqueIndex, uuid } from 'drizzle-orm/pg-core';
 import { unitEnum } from '../enums/Unit';
+import { accounts } from './accounts';
 import { ingredients } from './ingredients';
 import { products } from './products';
 
@@ -18,7 +19,7 @@ export const productRecipeItems = pgTable(
 
     accountId: uuid('account_id')
       .notNull()
-      .references(() => ingredients.id, { onDelete: 'cascade' }),
+      .references(() => accounts.id, { onDelete: 'cascade' }),
 
     quantityUsed: numeric('quantity_used', { precision: 14, scale: 3 }).notNull(),
     unitUsed: unitEnum('unit_used').notNull(),
