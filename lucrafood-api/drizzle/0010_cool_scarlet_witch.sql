@@ -1,0 +1,4 @@
+ALTER TABLE "ingredient_purchases" ADD COLUMN "account_id" uuid NOT NULL;--> statement-breakpoint
+ALTER TABLE "product_recipe_items" ADD COLUMN "account_id" uuid NOT NULL;--> statement-breakpoint
+ALTER TABLE "ingredient_purchases" ADD CONSTRAINT "ingredient_purchases_account_id_ingredients_id_fk" FOREIGN KEY ("account_id") REFERENCES "public"."ingredients"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "product_recipe_items" ADD CONSTRAINT "product_recipe_items_account_id_ingredients_id_fk" FOREIGN KEY ("account_id") REFERENCES "public"."ingredients"("id") ON DELETE cascade ON UPDATE no action;
