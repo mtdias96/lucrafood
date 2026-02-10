@@ -2,11 +2,12 @@
 import { IngredientPurchase } from '@application/entities/IngredientsPurchase';
 import { ingredientPurchases } from '../schemas';
 
-export class IngredientPriceMapper {
+export class IngredietPurchaseMapper {
   static toRow(entity: IngredientPurchase): typeof ingredientPurchases.$inferInsert {
     return {
       id: entity.id,
       ingredientId: entity.ingredientId,
+      accountId: entity.accountId,
       storeId: entity.storeId ? entity.storeId.toString() : null,
 
       totalPrice: entity.totalPrice.toString(),
@@ -21,7 +22,9 @@ export class IngredientPriceMapper {
   static toEntity(row: typeof ingredientPurchases.$inferSelect): IngredientPurchase {
     return new IngredientPurchase({
       id: row.id,
+
       ingredientId: row.ingredientId,
+      accountId: row.accountId,
       storeId: row.storeId ?? null,
 
       totalPrice: Number(row.totalPrice),

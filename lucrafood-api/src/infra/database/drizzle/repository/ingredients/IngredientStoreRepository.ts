@@ -23,6 +23,7 @@ export class IngredientStoreRepository {
 
     return row ?? null;
   }
+
   async findByName(input: { name: string, accountId: string }): Promise<IngredientStore | null> {
     const [row] = await this.db.client
       .select()

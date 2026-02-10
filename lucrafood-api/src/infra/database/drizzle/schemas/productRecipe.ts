@@ -16,6 +16,10 @@ export const productRecipeItems = pgTable(
       .notNull()
       .references(() => ingredients.id, { onDelete: 'restrict' }),
 
+    accountId: uuid('account_id')
+      .notNull()
+      .references(() => ingredients.id, { onDelete: 'cascade' }),
+
     quantityUsed: numeric('quantity_used', { precision: 14, scale: 3 }).notNull(),
     unitUsed: unitEnum('unit_used').notNull(),
 

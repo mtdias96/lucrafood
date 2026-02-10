@@ -35,9 +35,9 @@ export class CreateIngredientPurchaseUseCase {
       input.packageUnit,
     );
 
-    const ingredient = new IngredientPurchase({ ingredientId, storeId, packageQty, packageUnit, totalPrice, unitPrice, purchasedAt });
+    const purchase = new IngredientPurchase({ ingredientId, accountId, storeId, packageQty, packageUnit, totalPrice, unitPrice, purchasedAt });
 
-    const created = await this.ingredientPurchaseRepository.create(ingredient);
+    const created = await this.ingredientPurchaseRepository.create(purchase);
 
     return {
       ingredientPurchase: created,

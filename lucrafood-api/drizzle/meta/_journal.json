@@ -71,6 +71,13 @@
       "when": 1770664115588,
       "tag": "0009_rainy_master_mold",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1770723883574,
+      "tag": "0010_cool_scarlet_witch",
+      "breakpoints": true
     }
   ]
 }
