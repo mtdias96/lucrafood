@@ -59,8 +59,8 @@ export namespace Controller {
     TType extends TRouteType,
     TBody = Record<string, unknown>,
     TParams = Record<string, unknown>,
-    THeaders = Record<string, string>,
     TQueryParams = Record<string, unknown>,
+    THeaders = Record<string, string>,
   > = TType extends 'public'
     ? PublicRequest<TBody, TParams, TQueryParams, THeaders>
     : PrivateRequest<TBody, TParams, TQueryParams, THeaders>;
