@@ -16,7 +16,7 @@ export const productRecipeSchema = z.object({
       message: 'unitUsed is invalid',
     }),
 
-  }),
+  }).array(),
 });
 
 export type ProductRecipeBody = z.infer<typeof productRecipeSchema>;
