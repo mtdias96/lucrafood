@@ -7,7 +7,7 @@ import { DbError } from '@application/errors/db/DbError';
 import { PackageUnit } from '@shared/types/PackageUnit';
 import { DrizzleClient } from '../../Client';
 import { ProductMapper } from '../../mappers/ProductMapper';
-import { ingredients, productRecipeItems, products } from '../../schemas';
+import { ingredientPurchases, ingredients, productRecipeItems, products } from '../../schemas';
 
 @Injectable()
 export class ProductRepository {
@@ -71,24 +71,24 @@ export class ProductRepository {
       return [];
     }
 
-    const itemsRows = await this.db.client
+    const productItem = await this.db.client
       .select()
       .from(productRecipeItems).where(and(
         eq(productRecipeItems.accountId, input.accountId),
         inArray(productRecipeItems.productId, productIds),
       ));
 
-    if (itemsRows.length === 0) { return []; }
+    if (productItem.length === 0) { return []; }
 
-    const itemsByProductId = new Map<string, typeof itemsRows>();
+    const itemsByProductId = new Map<string, typeof productItem>();
 
-    for (const item of itemsRows) {
+    for (const item of productItem) {
       const current = itemsByProductId.get(item.productId) ?? [];
       current.push(item);
       itemsByProductId.set(item.productId, current);
     }
 
-    const ingredientIds = [...new Set(itemsRows.map(i => i.ingredientId))];
+    const ingredientIds = [...new Set(productItem.map(i => i.ingredientId))];
 
     if (ingredientIds.length === 0) { return []; }
 
@@ -100,11 +100,23 @@ export class ProductRepository {
         inArray(ingredients.id, ingredientIds),
       ));
 
+    const ingredientId = ingredientsRows.map(ingredient => ingredient.id);
     const ingredientById = new Map<string, typeof ingredientsRows[number]>();
 
     for (const item of ingredientsRows) {
       ingredientById.set(item.id, item);
     }
+
+    console.log('ingredientId (input):', ingredientId);
+    const ingredientPrice = await this.db.client
+      .select()
+      .from(ingredientPurchases)
+      .where(and(
+        eq(ingredientPurchases.accountId, input.accountId),
+        inArray(ingredientPurchases.ingredientId, ingredientId),
+      ));
+
+      console.log({ ingredientPrice, ingredientId });
 
     const productWithItemsAndIngredients: ProductRepository.ProductWithItemsAndIngredients =
       product.map(p => {
