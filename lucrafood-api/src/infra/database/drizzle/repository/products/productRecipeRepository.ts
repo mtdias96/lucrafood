@@ -12,6 +12,23 @@ import { productRecipeItems } from '../../schemas/productRecipeItems';
 export class ProductRecipeRepository {
   constructor(private readonly db: DrizzleClient) { }
 
+  async create(entity: ProductRecipe[]): Promise<ProductRecipe[]> {
+    const value = ProductRecipeMapper.toRows(entity);
+
+    const result = await this.db.client
+      .insert(productRecipeItems)
+      .values(value)
+      .returning();
+
+    if (result.length === 0) {
+      throw new DbError('DB_INSERT_FAILED: no rows returned');
+    }
+
+    const resultMapper = result.map((r => ProductRecipeMapper.toEntity(r)));
+
+    return resultMapper;
+  }
+
   async findById(entity: { productId: string, accountId: string }): Promise<ProductRecipe | null> {
 
     const [row] = await this.db.client
@@ -26,18 +43,20 @@ export class ProductRecipeRepository {
     return row ? ProductRecipeMapper.toEntity(row) : null;
   }
 
-  async create(entity: ProductRecipe): Promise<ProductRecipe> {
-    const value = ProductRecipeMapper.toRow(entity);
+  async addRecipeItem(entity: ProductRecipe[]) {
+    const values = ProductRecipeMapper.toRows(entity);
 
-    const [created] = await this.db.client
+    return this.db.client
       .insert(productRecipeItems)
-      .values(value)
-      .returning();
-
-    if (!created) {
-      throw new DbError('DB_INSERT_FAILED: Product returned no row');
-    }
-
-    return ProductRecipeMapper.toEntity(created);
+      .values(values)
+      .returning({
+        id: productRecipeItems.id,
+        ingredientId: productRecipeItems.ingredientId,
+        productId: productRecipeItems.productId,
+        quantityUsed: productRecipeItems.quantityUsed,
+        accountId: productRecipeItems.accountId,
+        unitUsed: productRecipeItems.unitUsed,
+      });
   }
+
 }
