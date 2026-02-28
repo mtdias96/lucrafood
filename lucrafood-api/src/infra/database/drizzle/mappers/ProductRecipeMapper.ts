@@ -3,16 +3,15 @@ import { ProductRecipe } from '@application/entities/ProductRecipe';
 import { productRecipeItems } from '../schemas/productRecipeItems';
 
 export class ProductRecipeMapper {
-  static toRow(entity: ProductRecipe): typeof productRecipeItems.$inferInsert {
-    return {
-      id: entity.id,
-      ingredientId: entity.ingredientId,
-      accountId: entity.accountId,
-      productId: entity.productId,
-      quantityUsed: entity.quantityUsed.toString(),
-      unitUsed: entity.unitUsed,
-
-    };
+  static toRows(entities: ProductRecipe[]): (typeof productRecipeItems.$inferInsert)[] {
+    return entities.map((e) => ({
+      id: e.id,
+      ingredientId: e.ingredientId,
+      accountId: e.accountId,
+      productId: e.productId,
+      quantityUsed: e.quantityUsed.toString(),
+      unitUsed: e.unitUsed,
+    }));
   }
 
   static toEntity(row: typeof productRecipeItems.$inferSelect): ProductRecipe {
