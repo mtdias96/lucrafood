@@ -7,7 +7,7 @@ import { DbError } from '@application/errors/db/DbError';
 import { PackageUnit } from '@shared/types/PackageUnit';
 import { DrizzleClient } from '../../Client';
 import { ProductMapper } from '../../mappers/ProductMapper';
-import { ingredientPurchases, ingredients, productRecipeItems, products } from '../../schemas';
+import { ingredients, productRecipeItems, products } from '../../schemas';
 
 @Injectable()
 export class ProductRepository {
@@ -38,8 +38,8 @@ export class ProductRepository {
       ))
       .limit(1);
 
-  if (!row) {return null;}
-  return ProductMapper.toDomain(row);
+    if (!row) { return null; }
+    return ProductMapper.toDomain(row);
   }
 
   async findById(input: { productId: string, accountId: string }): Promise<Product | null> {
@@ -52,8 +52,8 @@ export class ProductRepository {
       ))
       .limit(1);
 
-      if (!row) {return null;}
-  return ProductMapper.toDomain(row);
+    if (!row) { return null; }
+    return ProductMapper.toDomain(row);
   }
 
   async findPageWithRecipeByAccount(input: { accountId: string, offset: number, limit: number }): Promise<ProductRepository.ProductWithItemsAndIngredients> {
@@ -78,8 +78,6 @@ export class ProductRepository {
         inArray(productRecipeItems.productId, productIds),
       ));
 
-    if (productItem.length === 0) { return []; }
-
     const itemsByProductId = new Map<string, typeof productItem>();
 
     for (const item of productItem) {
@@ -90,33 +88,21 @@ export class ProductRepository {
 
     const ingredientIds = [...new Set(productItem.map(i => i.ingredientId))];
 
-    if (ingredientIds.length === 0) { return []; }
+    const ingredientsRows = ingredientIds.length > 0
+      ? await this.db.client
+        .select()
+        .from(ingredients)
+        .where(and(
+          eq(ingredients.accountId, input.accountId),
+          inArray(ingredients.id, ingredientIds),
+        ))
+      : [];
 
-    const ingredientsRows = await this.db.client
-      .select()
-      .from(ingredients)
-      .where(and(
-        eq(ingredients.accountId, input.accountId),
-        inArray(ingredients.id, ingredientIds),
-      ));
-
-    const ingredientId = ingredientsRows.map(ingredient => ingredient.id);
     const ingredientById = new Map<string, typeof ingredientsRows[number]>();
 
     for (const item of ingredientsRows) {
       ingredientById.set(item.id, item);
     }
-
-    console.log('ingredientId (input):', ingredientId);
-    const ingredientPrice = await this.db.client
-      .select()
-      .from(ingredientPurchases)
-      .where(and(
-        eq(ingredientPurchases.accountId, input.accountId),
-        inArray(ingredientPurchases.ingredientId, ingredientId),
-      ));
-
-      console.log({ ingredientPrice, ingredientId });
 
     const productWithItemsAndIngredients: ProductRepository.ProductWithItemsAndIngredients =
       product.map(p => {
@@ -157,28 +143,63 @@ export class ProductRepository {
       {
         salePrice: newPrice,
         updatedAt: new Date(),
-       } ,
+      },
     )
-    .where(and(
-      eq(products.id, productId),
-      eq(products.accountId, accountId),
-      ne(products.salePrice, newPrice),
-    ))
-    .returning({ id: products.id })
-    ;
+      .where(and(
+        eq(products.id, productId),
+        eq(products.accountId, accountId),
+        ne(products.salePrice, newPrice),
+      ))
+      .returning({ id: products.id })
+      ;
 
-    if(updated.length > 0) {return 'updated';}
+    if (updated.length > 0) { return 'updated'; }
 
     const [exists] = await this.db.client
-    .select()
-    .from(products)
-    .where(and(
-      eq(products.id, productId),
-      eq(products.accountId, accountId),
-    ))
-    .limit(1);
+      .select()
+      .from(products)
+      .where(and(
+        eq(products.id, productId),
+        eq(products.accountId, accountId),
+      ))
+      .limit(1);
 
     return exists ? 'unchanged' : 'not_found';
+  }
+
+  async update(input: ProductRepository.UpdateProduct): Promise<Product> {
+    const updates: Record<string, unknown> = { updatedAt: new Date() };
+
+    if (input.name !== undefined) { updates.name = input.name; }
+    if (input.yieldQty !== undefined) { updates.yieldQty = input.yieldQty; }
+    if (input.yieldUnit !== undefined) { updates.yieldUnit = input.yieldUnit; }
+
+    const [updated] = await this.db.client
+      .update(products)
+      .set(updates)
+      .where(and(
+        eq(products.id, input.productId),
+        eq(products.accountId, input.accountId),
+      ))
+      .returning();
+
+    if (!updated) {
+      throw new DbError('DB_UPDATE_FAILED: Product returned no row');
+    }
+
+    return ProductMapper.toDomain(updated);
+  }
+
+  async delete(input: { accountId: string; productId: string }): Promise<string> {
+    const deleted = await this.db.client
+      .delete(products)
+      .where(and(
+        eq(products.id, input.productId),
+        eq(products.accountId, input.accountId),
+      ))
+      .returning({ id: products.id });
+
+    return deleted.length > 0 ? 'deleted' : 'not_found';
   }
 
 }
@@ -203,5 +224,13 @@ export namespace ProductRepository {
     accountId: string;
     productId: string;
     salePrice: number
+  }
+
+  export type UpdateProduct = {
+    accountId: string;
+    productId: string;
+    name?: string;
+    yieldQty?: number;
+    yieldUnit?: PackageUnit;
   }
 }

@@ -12,7 +12,7 @@ export class ProductRecipe {
 
   readonly createdAt: Date;
 
-  constructor(attrs: Ingredient.Attributes) {
+  constructor(attrs: ProductRecipe.Attributes) {
     this.id = attrs.id ?? randomUUID().toString();
     this.accountId = attrs.accountId;
     this.productId = attrs.productId;
@@ -25,7 +25,8 @@ export class ProductRecipe {
 
   }
 }
-export namespace Ingredient {
+
+export namespace ProductRecipe {
   export type Attributes = {
     id?: string
     accountId: string;

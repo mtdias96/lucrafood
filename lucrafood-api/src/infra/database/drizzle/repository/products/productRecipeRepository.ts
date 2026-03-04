@@ -4,6 +4,7 @@ import { and, eq } from 'drizzle-orm';
 
 import { ProductRecipe } from '@application/entities/ProductRecipe';
 import { DbError } from '@application/errors/db/DbError';
+import { PackageUnit } from '@shared/types/PackageUnit';
 import { DrizzleClient } from '../../Client';
 import { ProductRecipeMapper } from '../../mappers/ProductRecipeMapper';
 import { productRecipeItems } from '../../schemas/productRecipeItems';
@@ -57,6 +58,46 @@ export class ProductRecipeRepository {
         accountId: productRecipeItems.accountId,
         unitUsed: productRecipeItems.unitUsed,
       });
+  }
+
+  async updateItem(input: {
+    accountId: string;
+    productId: string;
+    recipeItemId: string;
+    quantityUsed: number;
+    unitUsed: PackageUnit;
+  }): Promise<string> {
+    const updated = await this.db.client
+      .update(productRecipeItems)
+      .set({
+        quantityUsed: input.quantityUsed.toString(),
+        unitUsed: input.unitUsed,
+      })
+      .where(and(
+        eq(productRecipeItems.id, input.recipeItemId),
+        eq(productRecipeItems.productId, input.productId),
+        eq(productRecipeItems.accountId, input.accountId),
+      ))
+      .returning({ id: productRecipeItems.id });
+
+    return updated.length > 0 ? 'updated' : 'not_found';
+  }
+
+  async deleteItem(input: {
+    accountId: string;
+    productId: string;
+    recipeItemId: string;
+  }): Promise<string> {
+    const deleted = await this.db.client
+      .delete(productRecipeItems)
+      .where(and(
+        eq(productRecipeItems.id, input.recipeItemId),
+        eq(productRecipeItems.productId, input.productId),
+        eq(productRecipeItems.accountId, input.accountId),
+      ))
+      .returning({ id: productRecipeItems.id });
+
+    return deleted.length > 0 ? 'deleted' : 'not_found';
   }
 
 }

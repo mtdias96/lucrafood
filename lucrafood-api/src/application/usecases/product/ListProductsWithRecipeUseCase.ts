@@ -1,5 +1,5 @@
 
-import { InvalidPaginationError } from '@application/errors/http/InvalidPaginationError';
+import { PaginationService } from '@application/service/PaginationService';
 import { ProductRepository } from '@infra/database/drizzle/repository/products/productRepository';
 
 import { Injectable } from '@kernel/decorators/Injactable';
@@ -14,25 +14,10 @@ export class ListProductsWithRecipeUseCase {
   async execute(input: ListProductsWithRecipeUseCase.Input): Promise<ListProductsWithRecipeUseCase.Output> {
     const { accountId } = input;
 
-    const page = input.page ?? 1;
-    const limit = input.limit ?? 10;
-
-    const isInvalidLimit = !Number.isInteger(limit) ||
-      limit < 1 ||
-      limit > 50;
-    const isInvalidPage = !Number.isInteger(page) ||
-      page < 1 ||
-      page > 50;
-
-    if (isInvalidLimit) {
-      throw new InvalidPaginationError('limit must be between 1 and 50');
-    }
-
-    if (isInvalidPage) {
-      throw new InvalidPaginationError('page must be between 1 and 50');
-    }
-
-    const offset = (page - 1) * limit;
+    const { page, limit, offset } = PaginationService.validate(
+      { page: input.page, limit: input.limit },
+      { defaultLimit: 10 },
+    );
 
     const [products, total] = await Promise.all([
       this.productRepository.findPageWithRecipeByAccount({ accountId, offset, limit }),
