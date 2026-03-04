@@ -56,6 +56,59 @@ export class ProductRepository {
     return ProductMapper.toDomain(row);
   }
 
+  async findOneWithRecipeByAccount(input: { productId: string, accountId: string }): Promise<ProductRepository.ProductWithItemsAndIngredients[number] | null> {
+    const [product] = await this.db.client
+      .select()
+      .from(products)
+      .where(and(
+        eq(products.id, input.productId),
+        eq(products.accountId, input.accountId),
+      ))
+      .limit(1);
+
+    if (!product) { return null; }
+
+    const recipeItems = await this.db.client
+      .select()
+      .from(productRecipeItems)
+      .where(and(
+        eq(productRecipeItems.productId, product.id),
+        eq(productRecipeItems.accountId, input.accountId),
+      ));
+
+    const ingredientIds = [...new Set(recipeItems.map(i => i.ingredientId))];
+
+    const ingredientsRows = ingredientIds.length > 0
+      ? await this.db.client
+        .select()
+        .from(ingredients)
+        .where(and(
+          eq(ingredients.accountId, input.accountId),
+          inArray(ingredients.id, ingredientIds),
+        ))
+      : [];
+
+    const ingredientById = new Map<string, typeof ingredientsRows[number]>();
+    for (const item of ingredientsRows) {
+      ingredientById.set(item.id, item);
+    }
+
+    return {
+      id: product.id,
+      name: product.name,
+      yieldQty: product.yieldQty,
+      yieldUnit: product.yieldUnit,
+      salePrice: product.salePrice,
+      createdAt: product.createdAt,
+      items: recipeItems.map(item => ({
+        ingredientId: item.ingredientId,
+        ingredientName: ingredientById.get(item.ingredientId)?.name ?? null,
+        quantity: item.quantityUsed,
+        unit: item.unitUsed,
+      })),
+    };
+  }
+
   async findPageWithRecipeByAccount(input: { accountId: string, offset: number, limit: number }): Promise<ProductRepository.ProductWithItemsAndIngredients> {
     const product = await this.db.client
       .select()
