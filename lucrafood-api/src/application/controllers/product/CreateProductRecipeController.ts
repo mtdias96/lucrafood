@@ -17,14 +17,12 @@ export class CreateProductRecipeController extends Controller<'private', CreateP
     const { accountId } = request;
     const { productId } = request.params;
 
-    const { ingredientId, quantityUsed, unitUsed } = request.body.productRecipe;
+    const { productRecipe } = request.body;
 
     const result = await this.createProductRecipeUseCase.execute({
       accountId,
-      ingredientId,
       productId,
-      quantityUsed,
-      unitUsed,
+      productRecipe,
     });
 
     return {
@@ -51,6 +49,6 @@ export namespace CreateProductRecipeController {
       quantityUsed: number;
       unitUsed: PackageUnit;
       createdAt: Date;
-    };
+    }[];
   }
 }

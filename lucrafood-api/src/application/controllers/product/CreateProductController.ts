@@ -15,13 +15,14 @@ export class CreateProductController extends Controller<'private', CreateProduct
 
   protected override async handle(request: Controller.Request<'private', ProductBody>): Promise<Controller.Response<CreateProductController.Response>> {
     const { accountId } = request;
-    const { name, yieldQty, yieldUnit } = request.body.product;
+    const { name, yieldQty, yieldUnit, salePrice } = request.body.product;
 
     const result = await this.createProductUseCase.execute({
       accountId,
       name,
       yieldQty,
       yieldUnit,
+      salePrice,
     });
 
     return {

@@ -1,10 +1,12 @@
 
 import { Injectable } from '@kernel/decorators/Injactable';
-import { and, count, eq, inArray } from 'drizzle-orm';
+import { and, count, eq, inArray, ne } from 'drizzle-orm';
 
 import { Product } from '@application/entities/Product';
 import { DbError } from '@application/errors/db/DbError';
+import { PackageUnit } from '@shared/types/PackageUnit';
 import { DrizzleClient } from '../../Client';
+import { ProductMapper } from '../../mappers/ProductMapper';
 import { ingredients, productRecipeItems, products } from '../../schemas';
 
 @Injectable()
@@ -12,16 +14,18 @@ export class ProductRepository {
   constructor(private readonly db: DrizzleClient) { }
 
   async create(input: Product): Promise<Product> {
+    const row = ProductMapper.toRow(input);
+
     const [created] = await this.db.client
       .insert(products)
-      .values(input)
+      .values(row)
       .returning();
 
     if (!created) {
       throw new DbError('DB_INSERT_FAILED: Product returned no row');
     }
 
-    return created;
+    return ProductMapper.toDomain(created);
   }
 
   async findByName(input: { name: string, accountId: string }): Promise<Product | null> {
@@ -34,7 +38,8 @@ export class ProductRepository {
       ))
       .limit(1);
 
-    return row ?? null;
+    if (!row) { return null; }
+    return ProductMapper.toDomain(row);
   }
 
   async findById(input: { productId: string, accountId: string }): Promise<Product | null> {
@@ -47,7 +52,8 @@ export class ProductRepository {
       ))
       .limit(1);
 
-    return row ?? null;
+    if (!row) { return null; }
+    return ProductMapper.toDomain(row);
   }
 
   async findPageWithRecipeByAccount(input: { accountId: string, offset: number, limit: number }): Promise<ProductRepository.ProductWithItemsAndIngredients> {
@@ -65,34 +71,32 @@ export class ProductRepository {
       return [];
     }
 
-    const itemsRows = await this.db.client
+    const productItem = await this.db.client
       .select()
       .from(productRecipeItems).where(and(
         eq(productRecipeItems.accountId, input.accountId),
         inArray(productRecipeItems.productId, productIds),
       ));
 
-    if (itemsRows.length === 0) { return []; }
+    const itemsByProductId = new Map<string, typeof productItem>();
 
-    const itemsByProductId = new Map<string, typeof itemsRows>();
-
-    for (const item of itemsRows) {
+    for (const item of productItem) {
       const current = itemsByProductId.get(item.productId) ?? [];
       current.push(item);
       itemsByProductId.set(item.productId, current);
     }
 
-    const ingredientIds = [...new Set(itemsRows.map(i => i.ingredientId))];
+    const ingredientIds = [...new Set(productItem.map(i => i.ingredientId))];
 
-    const ingredientsRows = await this.db.client
-      .select()
-      .from(ingredients)
-      .where(and(
-        eq(ingredients.accountId, input.accountId),
-        inArray(ingredients.id, ingredientIds),
-      ));
-
-    if (ingredientIds.length === 0) { return []; }
+    const ingredientsRows = ingredientIds.length > 0
+      ? await this.db.client
+        .select()
+        .from(ingredients)
+        .where(and(
+          eq(ingredients.accountId, input.accountId),
+          inArray(ingredients.id, ingredientIds),
+        ))
+      : [];
 
     const ingredientById = new Map<string, typeof ingredientsRows[number]>();
 
@@ -109,6 +113,7 @@ export class ProductRepository {
           name: p.name,
           yieldQty: p.yieldQty,
           yieldUnit: p.yieldUnit,
+          salePrice: p.salePrice,
           createdAt: p.createdAt,
           items: items.map(item => ({
             ingredientId: item.ingredientId,
@@ -130,6 +135,73 @@ export class ProductRepository {
 
     return Number(result[0].count);
   }
+
+  async updateSalePrice({ accountId, productId, salePrice }: ProductRepository.updateSalePrice): Promise<string> {
+    const newPrice = salePrice.toFixed(2);
+
+    const updated = await this.db.client.update(products).set(
+      {
+        salePrice: newPrice,
+        updatedAt: new Date(),
+      },
+    )
+      .where(and(
+        eq(products.id, productId),
+        eq(products.accountId, accountId),
+        ne(products.salePrice, newPrice),
+      ))
+      .returning({ id: products.id })
+      ;
+
+    if (updated.length > 0) { return 'updated'; }
+
+    const [exists] = await this.db.client
+      .select()
+      .from(products)
+      .where(and(
+        eq(products.id, productId),
+        eq(products.accountId, accountId),
+      ))
+      .limit(1);
+
+    return exists ? 'unchanged' : 'not_found';
+  }
+
+  async update(input: ProductRepository.UpdateProduct): Promise<Product> {
+    const updates: Record<string, unknown> = { updatedAt: new Date() };
+
+    if (input.name !== undefined) { updates.name = input.name; }
+    if (input.yieldQty !== undefined) { updates.yieldQty = input.yieldQty; }
+    if (input.yieldUnit !== undefined) { updates.yieldUnit = input.yieldUnit; }
+
+    const [updated] = await this.db.client
+      .update(products)
+      .set(updates)
+      .where(and(
+        eq(products.id, input.productId),
+        eq(products.accountId, input.accountId),
+      ))
+      .returning();
+
+    if (!updated) {
+      throw new DbError('DB_UPDATE_FAILED: Product returned no row');
+    }
+
+    return ProductMapper.toDomain(updated);
+  }
+
+  async delete(input: { accountId: string; productId: string }): Promise<string> {
+    const deleted = await this.db.client
+      .delete(products)
+      .where(and(
+        eq(products.id, input.productId),
+        eq(products.accountId, input.accountId),
+      ))
+      .returning({ id: products.id });
+
+    return deleted.length > 0 ? 'deleted' : 'not_found';
+  }
+
 }
 
 export namespace ProductRepository {
@@ -137,13 +209,28 @@ export namespace ProductRepository {
     id: string;
     name: string;
     yieldQty: number;
-    yieldUnit: string;
+    yieldUnit: PackageUnit;
+    salePrice: string,
     createdAt: Date;
     items: Array<{
       ingredientId: string;
       ingredientName: string | null;
       quantity: string;
-      unit: string;
+      unit: PackageUnit;
     }>;
   }>;
+
+  export type updateSalePrice = {
+    accountId: string;
+    productId: string;
+    salePrice: number
+  }
+
+  export type UpdateProduct = {
+    accountId: string;
+    productId: string;
+    name?: string;
+    yieldQty?: number;
+    yieldUnit?: PackageUnit;
+  }
 }

@@ -14,25 +14,28 @@ export class CreateProductRecipeUseCase {
   ) { };
 
   async execute(input: CreateProductRecipeUseCase.Input): Promise<CreateProductRecipeUseCase.Output> {
-    const { accountId, ingredientId, productId, quantityUsed, unitUsed } = input;
+    const { accountId, productId, productRecipe } = input;
 
-    const productAlreadyExists = await this.productRecipeRepository.findById({ accountId, productId });
+    const alreadyExists = await this.productRecipeRepository.findById({ accountId, productId });
 
-    if (productAlreadyExists) { throw new Conflict('Product is already exists'); }
+    if (alreadyExists) { throw new Conflict('Product recipe already exists'); }
 
-    const product = new ProductRecipe({ accountId, ingredientId, productId, quantityUsed, unitUsed });
+    const entities = productRecipe.map(
+      ({ ingredientId, quantityUsed, unitUsed }) =>
+        new ProductRecipe({ accountId, ingredientId, productId, quantityUsed, unitUsed }),
+    );
 
-    const created = await this.productRecipeRepository.create(product);
+    const created = await this.productRecipeRepository.create(entities);
 
     return {
-      productRecipe: {
-        id: created.id,
-        productId: created.productId,
-        ingredientId: created.ingredientId,
-        quantityUsed: created.quantityUsed,
-        unitUsed: created.unitUsed,
-        createdAt: created.createdAt,
-      },
+      productRecipe: created.map((item) => ({
+        id: item.id,
+        productId: item.productId,
+        ingredientId: item.ingredientId,
+        quantityUsed: item.quantityUsed,
+        unitUsed: item.unitUsed,
+        createdAt: item.createdAt,
+      })),
     };
   }
 }
@@ -40,12 +43,14 @@ export class CreateProductRecipeUseCase {
 export namespace CreateProductRecipeUseCase {
   export type Input = {
     accountId: string;
-    ingredientId: string;
     productId: string;
 
-    quantityUsed: number
-    unitUsed: PackageUnit
-    createdAt?: Date;
+    productRecipe: {
+      ingredientId: string;
+      quantityUsed: number
+      unitUsed: PackageUnit
+      createdAt?: Date;
+    }[]
   }
 
   export type Output = {
@@ -57,6 +62,6 @@ export namespace CreateProductRecipeUseCase {
       quantityUsed: number
       unitUsed: PackageUnit
       createdAt: Date;
-    }
+    }[]
   }
 }

@@ -1,0 +1,79 @@
+import { PackageUnit } from '@shared/types/PackageUnit';
+
+import { UnitPriceService } from './UnitBaseCalculator';
+
+export class ProductFinancialService {
+  static calculate(
+    product: ProductFinancialService.ProductInput,
+    unitPriceByIngredient: Map<string, number>,
+  ): ProductFinancialService.ProductFinancials {
+    const salePrice = Number(product.salePrice);
+
+    let totalCost = 0;
+
+    const items = product.items.map(item => {
+      const ingredientUnitPrice = unitPriceByIngredient.get(item.ingredientId);
+      let cost: number | null = null;
+
+      if (ingredientUnitPrice !== undefined) {
+        const baseQty = UnitPriceService.toBaseQty(Number(item.quantity), item.unit as PackageUnit);
+        cost = Number((baseQty * ingredientUnitPrice).toFixed(2));
+        totalCost += cost;
+      }
+
+      return {
+        ingredientId: item.ingredientId,
+        ingredientName: item.ingredientName,
+        quantity: item.quantity,
+        unit: item.unit,
+        cost,
+      };
+    });
+
+    totalCost = Number(totalCost.toFixed(2));
+
+    const unitCost = product.yieldQty > 0
+      ? Number((totalCost / product.yieldQty).toFixed(2))
+      : 0;
+
+    const grossProfit = Number((salePrice - unitCost).toFixed(2));
+
+    const profitMargin = salePrice > 0
+      ? Number(((grossProfit / salePrice) * 100).toFixed(2))
+      : 0;
+
+    return {
+      items,
+      financials: { totalCost, unitCost, grossProfit, profitMargin },
+    };
+  }
+}
+
+export namespace ProductFinancialService {
+  export type ProductInput = {
+    yieldQty: number;
+    salePrice: string;
+    items: Array<{
+      ingredientId: string;
+      ingredientName: string | null;
+      quantity: string;
+      unit: string;
+    }>;
+  };
+
+  export type ProductFinancials = {
+    items: Array<{
+      ingredientId: string;
+      ingredientName: string | null;
+      quantity: string;
+      unit: string;
+      cost: number | null;
+    }>;
+    financials: {
+      totalCost: number;
+      unitCost: number;
+      grossProfit: number;
+      profitMargin: number;
+    };
+  };
+}

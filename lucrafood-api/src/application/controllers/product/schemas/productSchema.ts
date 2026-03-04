@@ -14,6 +14,13 @@ export const productSchema = z.object({
       message: 'yieldUnit is invalid',
     }),
 
+     salePrice: z.coerce
+      .number({
+        message: 'salePrice must be a number',
+      })
+      .positive({
+        message: 'salePrice must be greater than 0',
+      }),
   }),
 });
 

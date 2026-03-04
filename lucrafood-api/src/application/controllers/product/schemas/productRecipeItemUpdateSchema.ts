@@ -1,10 +1,8 @@
 import { PACKAGE_UNITS } from '@shared/types/PackageUnit';
 import { z } from 'zod';
 
-export const productRecipeSchema = z.object({
-  productRecipe: z.object({
-    ingredientId: z.uuid(),
-
+export const productRecipeItemUpdateSchema = z.object({
+  recipeItem: z.object({
     quantityUsed: z.number({
       message: 'quantityUsed must be a number',
     })
@@ -15,8 +13,7 @@ export const productRecipeSchema = z.object({
     unitUsed: z.enum(PACKAGE_UNITS, {
       message: 'unitUsed is invalid',
     }),
-
-  }).array(),
+  }),
 });
 
-export type ProductRecipeBody = z.infer<typeof productRecipeSchema>;
+export type ProductRecipeItemUpdateBody = z.infer<typeof productRecipeItemUpdateSchema>;

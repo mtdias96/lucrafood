@@ -11,7 +11,8 @@ export class ListAllProductController extends Controller<'private', ListAllProdu
   }
 
   protected override async handle({ accountId, queryParams }: ListAllProductController.Request): Promise<Controller.Response<ListAllProductController.Response>> {
-    const { limit, page } = queryParams;
+    const page = Number(queryParams.page);
+    const limit = Number(queryParams.limit);
 
     const productWithRecipe = await this.listProductsWithRecipe.execute({
       accountId,

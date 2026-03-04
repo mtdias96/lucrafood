@@ -1,6 +1,6 @@
 
 import { Injectable } from '@kernel/decorators/Injactable';
-import { and, eq } from 'drizzle-orm';
+import { and, count, eq } from 'drizzle-orm';
 
 import { Ingredient } from '@application/entities/Ingredient';
 import { DbError } from '@application/errors/db/DbError';
@@ -35,6 +35,24 @@ export class IngredientRepository {
       .limit(1);
 
     return row ?? null;
+  }
+
+  async findPageByAccount(input: { accountId: string, offset: number, limit: number }): Promise<Ingredient[]> {
+    return this.db.client
+      .select()
+      .from(ingredients)
+      .where(eq(ingredients.accountId, input.accountId))
+      .offset(input.offset)
+      .limit(input.limit);
+  }
+
+  async countByAccount(accountId: string): Promise<number> {
+    const [result] = await this.db.client
+      .select({ count: count() })
+      .from(ingredients)
+      .where(eq(ingredients.accountId, accountId));
+
+    return Number(result.count);
   }
 
   async create(input: Ingredient): Promise<Ingredient> {
