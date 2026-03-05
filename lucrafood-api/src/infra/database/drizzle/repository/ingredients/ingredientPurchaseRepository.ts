@@ -13,10 +13,11 @@ import { ingredientPurchases } from '../../schemas';
 export class ingredientPurchaseRepository {
   constructor(private readonly db: DrizzleClient) { }
 
-  async create(entity: IngredientPurchase): Promise<IngredientPurchase> {
+  async create(entity: IngredientPurchase, tx?: DrizzleClient.Transaction): Promise<IngredientPurchase> {
     const values = IngredietPurchaseMapper.toRow(entity);
+    const executor = tx ?? this.db.client;
 
-    const [created] = await this.db.client
+    const [created] = await executor
       .insert(ingredientPurchases)
       .values(values)
       .returning();

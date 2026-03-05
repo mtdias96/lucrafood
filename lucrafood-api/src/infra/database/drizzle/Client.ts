@@ -20,7 +20,15 @@ export class DrizzleClient {
     return this.db;
   }
 
+  async transaction<T>(fn: (tx: DrizzleClient.Transaction) => Promise<T>): Promise<T> {
+    return this.db.transaction(fn);
+  }
+
   async close() {
     await this.pool.end();
   }
+}
+
+export namespace DrizzleClient {
+  export type Transaction = Parameters<Parameters<DrizzleClient['client']['transaction']>[0]>[0];
 }
