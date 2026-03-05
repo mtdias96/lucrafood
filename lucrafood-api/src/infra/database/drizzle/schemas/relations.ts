@@ -3,9 +3,11 @@ import { relations } from 'drizzle-orm';
 import { accounts } from './accounts';
 import { ingredients } from './ingredients';
 import { ingredientPurchases } from './ingredientsPurchase';
+import { ingredientStock } from './ingredientStock';
 
 import { productRecipeItems } from './productRecipeItems';
 import { products } from './products';
+import { productStock } from './productStock';
 import { stores } from './store';
 
 // =============
@@ -29,6 +31,8 @@ export const ingredientsRelations = relations(ingredients, ({ one, many }) => ({
   recipeItems: many(productRecipeItems),
 
   purchases: many(ingredientPurchases),
+
+  stock: many(ingredientStock),
 }));
 
 // =============
@@ -53,6 +57,8 @@ export const productsRelations = relations(products, ({ one, many }) => ({
   }),
 
   recipeItems: many(productRecipeItems),
+
+  stock: many(productStock),
 }));
 
 // =======================
@@ -82,5 +88,35 @@ export const ingredientPurchasesRelations = relations(ingredientPurchases, ({ on
   store: one(stores, {
     fields: [ingredientPurchases.storeId],
     references: [stores.id],
+  }),
+}));
+
+// =======================
+// IngredientStock
+// =======================
+export const ingredientStockRelations = relations(ingredientStock, ({ one }) => ({
+  ingredient: one(ingredients, {
+    fields: [ingredientStock.ingredientId],
+    references: [ingredients.id],
+  }),
+
+  account: one(accounts, {
+    fields: [ingredientStock.accountId],
+    references: [accounts.id],
+  }),
+}));
+
+// =======================
+// ProductStock
+// =======================
+export const productStockRelations = relations(productStock, ({ one }) => ({
+  product: one(products, {
+    fields: [productStock.productId],
+    references: [products.id],
+  }),
+
+  account: one(accounts, {
+    fields: [productStock.accountId],
+    references: [accounts.id],
   }),
 }));
