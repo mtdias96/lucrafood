@@ -2,6 +2,7 @@
 import { Conflict } from '@application/errors/http/Conflict';
 import { NotFound } from '@application/errors/http/NotFound';
 import { UnitPriceService } from '@application/service/UnitBaseCalculator';
+import { DrizzleClient } from '@infra/database/drizzle/Client';
 import { ProductRepository } from '@infra/database/drizzle/repository/products/productRepository';
 import { StockRepository } from '@infra/database/drizzle/repository/stock/StockRepository';
 import { Injectable } from '@kernel/decorators/Injactable';
@@ -12,6 +13,7 @@ export class ProduceProductUseCase {
   constructor(
     private readonly productRepository: ProductRepository,
     private readonly stockRepository: StockRepository,
+    private readonly db: DrizzleClient,
   ) { }
 
   async execute(input: ProduceProductUseCase.Input): Promise<ProduceProductUseCase.Output> {
@@ -27,7 +29,7 @@ export class ProduceProductUseCase {
       throw new Conflict('Product has no recipe items');
     }
 
-    const deductions: Array<{ ingredientId: string; ingredientName: string | null; qtyDeducted: number; unit: string }> = [];
+    const deductions: Array<{ ingredientId: string; ingredientName: string | null; qtyDeducted: number }> = [];
 
     for (const item of product.items) {
       const baseQtyPerUnit = UnitPriceService.toBaseQty(Number(item.quantity), item.unit as PackageUnit);
@@ -55,25 +57,24 @@ export class ProduceProductUseCase {
         ingredientId: item.ingredientId,
         ingredientName: item.ingredientName,
         qtyDeducted: totalQtyNeeded,
-        unit: stock.unit,
       });
     }
 
-    for (const deduction of deductions) {
-      const qtyInStockUnit = deduction.qtyDeducted;
+    await this.db.transaction(async (tx) => {
+      for (const deduction of deductions) {
+        await this.stockRepository.decrementIngredientStock({
+          ingredientId: deduction.ingredientId,
+          accountId,
+          qtyToSubtract: deduction.qtyDeducted,
+        }, tx);
+      }
 
-      await this.stockRepository.decrementIngredientStock({
-        ingredientId: deduction.ingredientId,
+      await this.stockRepository.incrementProductStock({
+        productId,
         accountId,
-        qtyToSubtract: qtyInStockUnit,
-      });
-    }
-
-    await this.stockRepository.incrementProductStock({
-      productId,
-      accountId,
-      qtyToAdd: quantity,
-      unit: product.yieldUnit,
+        qtyToAdd: quantity,
+        unit: product.yieldUnit,
+      }, tx);
     });
 
     return {
