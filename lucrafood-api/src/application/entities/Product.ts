@@ -10,6 +10,7 @@ export class Product {
   readonly yieldQty: number;
   readonly yieldUnit: PackageUnit;
   readonly salePrice: number;
+  readonly targetMargin: number | null;
 
   readonly createdAt: Date;
 
@@ -21,6 +22,7 @@ export class Product {
     this.yieldQty = attrs.yieldQty;
     this.yieldUnit = attrs.yieldUnit;
     this.salePrice = this.verifySalePriceIsValid(attrs.salePrice);
+    this.targetMargin = attrs.targetMargin ?? null;
 
     this.createdAt = attrs.createdAt ?? new Date();
   }
@@ -42,6 +44,7 @@ export namespace Product {
     yieldQty: number;
     yieldUnit: PackageUnit;
     salePrice: number;
+    targetMargin?: number | null;
     createdAt?: Date;
   };
 }

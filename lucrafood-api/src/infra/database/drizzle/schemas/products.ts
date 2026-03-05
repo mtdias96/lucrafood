@@ -16,6 +16,7 @@ export const products = pgTable(
     yieldUnit: unitEnum('yield_unit').notNull().default('un'),
 
     salePrice: numeric().notNull().default('0'),
+    targetMargin: numeric('target_margin'),
 
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at').defaultNow().notNull(),

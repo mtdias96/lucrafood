@@ -99,6 +99,7 @@ export class ProductRepository {
       yieldQty: product.yieldQty,
       yieldUnit: product.yieldUnit,
       salePrice: product.salePrice,
+      targetMargin: product.targetMargin,
       createdAt: product.createdAt,
       items: recipeItems.map(item => ({
         ingredientId: item.ingredientId,
@@ -163,6 +164,7 @@ export class ProductRepository {
         yieldQty: p.yieldQty,
         yieldUnit: p.yieldUnit,
         salePrice: p.salePrice,
+        targetMargin: p.targetMargin,
         createdAt: p.createdAt,
         items: items.map(item => ({
           ingredientId: item.ingredientId,
@@ -232,6 +234,7 @@ export class ProductRepository {
           yieldQty: p.yieldQty,
           yieldUnit: p.yieldUnit,
           salePrice: p.salePrice,
+          targetMargin: p.targetMargin,
           createdAt: p.createdAt,
           items: items.map(item => ({
             ingredientId: item.ingredientId,
@@ -291,6 +294,7 @@ export class ProductRepository {
     if (input.name !== undefined) { updates.name = input.name; }
     if (input.yieldQty !== undefined) { updates.yieldQty = input.yieldQty; }
     if (input.yieldUnit !== undefined) { updates.yieldUnit = input.yieldUnit; }
+    if (input.targetMargin !== undefined) { updates.targetMargin = input.targetMargin?.toString() ?? null; }
 
     const [updated] = await this.db.client
       .update(products)
@@ -329,6 +333,7 @@ export namespace ProductRepository {
     yieldQty: number;
     yieldUnit: PackageUnit;
     salePrice: string,
+    targetMargin: string | null,
     createdAt: Date;
     items: Array<{
       ingredientId: string;
@@ -350,5 +355,6 @@ export namespace ProductRepository {
     name?: string;
     yieldQty?: number;
     yieldUnit?: PackageUnit;
+    targetMargin?: number | null;
   }
 }

@@ -60,6 +60,7 @@ export namespace SimulateSalePriceUseCase {
     unitCost: number;
     grossProfit: number;
     profitMargin: number;
+    suggestedPrice: number | null;
   };
 
   export type Output = {

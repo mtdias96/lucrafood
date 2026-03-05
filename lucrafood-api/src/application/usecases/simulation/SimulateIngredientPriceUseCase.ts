@@ -89,6 +89,7 @@ export namespace SimulateIngredientPriceUseCase {
     unitCost: number;
     grossProfit: number;
     profitMargin: number;
+    suggestedPrice: number | null;
   };
 
   export type AffectedProduct = {

@@ -10,6 +10,7 @@ export class ProductMapper {
       yieldQty: product.yieldQty,
       yieldUnit: product.yieldUnit,
       salePrice: product.salePrice.toString(),
+      targetMargin: product.targetMargin?.toString() ?? null,
       createdAt: product.createdAt,
     };
   }
@@ -22,6 +23,7 @@ static toDomain(row: ProductMapper.ProductRow): Product {
     yieldQty: row.yieldQty,
     yieldUnit: row.yieldUnit,
     salePrice: Number(row.salePrice),
+    targetMargin: row.targetMargin ? Number(row.targetMargin) : null,
     createdAt: row.createdAt,
   });
 }
@@ -35,6 +37,7 @@ export namespace ProductMapper {
     yieldQty: number;
     yieldUnit: PackageUnit;
     salePrice: string;
+    targetMargin: string | null;
     createdAt: Date;
   }
 };
