@@ -109,6 +109,71 @@ export class ProductRepository {
     };
   }
 
+  async findAllWithRecipeByAccount(input: { accountId: string }): Promise<ProductRepository.ProductWithItemsAndIngredients> {
+    const product = await this.db.client
+      .select()
+      .from(products)
+      .where(eq(products.accountId, input.accountId));
+
+    const productIds = product.map(p => p.id);
+
+    if (productIds.length === 0) {
+      return [];
+    }
+
+    const productItem = await this.db.client
+      .select()
+      .from(productRecipeItems).where(and(
+        eq(productRecipeItems.accountId, input.accountId),
+        inArray(productRecipeItems.productId, productIds),
+      ));
+
+    const itemsByProductId = new Map<string, typeof productItem>();
+
+    for (const item of productItem) {
+      const current = itemsByProductId.get(item.productId) ?? [];
+      current.push(item);
+      itemsByProductId.set(item.productId, current);
+    }
+
+    const ingredientIds = [...new Set(productItem.map(i => i.ingredientId))];
+
+    const ingredientsRows = ingredientIds.length > 0
+      ? await this.db.client
+        .select()
+        .from(ingredients)
+        .where(and(
+          eq(ingredients.accountId, input.accountId),
+          inArray(ingredients.id, ingredientIds),
+        ))
+      : [];
+
+    const ingredientById = new Map<string, typeof ingredientsRows[number]>();
+
+    for (const item of ingredientsRows) {
+      ingredientById.set(item.id, item);
+    }
+
+    return product.map(p => {
+      const items = itemsByProductId.get(p.id) ?? [];
+
+      return {
+        id: p.id,
+        name: p.name,
+        yieldQty: p.yieldQty,
+        yieldUnit: p.yieldUnit,
+        salePrice: p.salePrice,
+        createdAt: p.createdAt,
+        items: items.map(item => ({
+          ingredientId: item.ingredientId,
+          ingredientName: ingredientById.get(item.ingredientId)?.name ?? null,
+          quantity: item.quantityUsed,
+          unit: item.unitUsed,
+        })),
+      };
+    });
+  }
+
   async findPageWithRecipeByAccount(input: { accountId: string, offset: number, limit: number }): Promise<ProductRepository.ProductWithItemsAndIngredients> {
     const product = await this.db.client
       .select()
