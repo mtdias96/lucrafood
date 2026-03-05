@@ -14,6 +14,12 @@ export const productUpdateSchema = z.object({
     yieldUnit: z.enum(PACKAGE_UNITS, {
       message: 'yieldUnit is invalid',
     }).optional(),
+    targetMargin: z.coerce
+      .number({ message: 'targetMargin must be a number' })
+      .min(0, { message: 'targetMargin must be between 0 and 100' })
+      .max(100, { message: 'targetMargin must be between 0 and 100' })
+      .nullable()
+      .optional(),
   }),
 });
 

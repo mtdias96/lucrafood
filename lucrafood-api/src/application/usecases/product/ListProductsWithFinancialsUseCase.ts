@@ -47,6 +47,7 @@ export class ListProductsWithFinancialsUseCase {
         yieldQty: product.yieldQty,
         yieldUnit: product.yieldUnit,
         salePrice: Number(product.salePrice),
+        targetMargin: product.targetMargin ? Number(product.targetMargin) : null,
         createdAt: product.createdAt,
         items,
         financials,
@@ -80,6 +81,7 @@ export namespace ListProductsWithFinancialsUseCase {
       yieldQty: number;
       yieldUnit: string;
       salePrice: number;
+      targetMargin: number | null;
       createdAt: Date;
       items: Array<{
         ingredientId: string;
@@ -93,6 +95,7 @@ export namespace ListProductsWithFinancialsUseCase {
         unitCost: number;
         grossProfit: number;
         profitMargin: number;
+        suggestedPrice: number | null;
       };
     }>;
     meta: {

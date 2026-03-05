@@ -42,9 +42,15 @@ export class ProductFinancialService {
       ? Number(((grossProfit / salePrice) * 100).toFixed(2))
       : 0;
 
+    const targetMargin = product.targetMargin ? Number(product.targetMargin) : null;
+
+    const suggestedPrice = targetMargin !== null && targetMargin < 100 && unitCost > 0
+      ? Number((unitCost / (1 - targetMargin / 100)).toFixed(2))
+      : null;
+
     return {
       items,
-      financials: { totalCost, unitCost, grossProfit, profitMargin },
+      financials: { totalCost, unitCost, grossProfit, profitMargin, suggestedPrice },
     };
   }
 }
@@ -53,6 +59,7 @@ export namespace ProductFinancialService {
   export type ProductInput = {
     yieldQty: number;
     salePrice: string;
+    targetMargin?: string | null;
     items: Array<{
       ingredientId: string;
       ingredientName: string | null;
@@ -74,6 +81,7 @@ export namespace ProductFinancialService {
       unitCost: number;
       grossProfit: number;
       profitMargin: number;
+      suggestedPrice: number | null;
     };
   };
 }

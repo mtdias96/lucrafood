@@ -10,9 +10,9 @@ export class UpdateProductUseCase {
   constructor(private readonly productRepository: ProductRepository) { }
 
   async execute(input: UpdateProductUseCase.Input): Promise<UpdateProductUseCase.Output> {
-    const { accountId, productId, name, yieldQty, yieldUnit } = input;
+    const { accountId, productId, name, yieldQty, yieldUnit, targetMargin } = input;
 
-    const hasAtLeastOneField = name !== undefined || yieldQty !== undefined || yieldUnit !== undefined;
+    const hasAtLeastOneField = name !== undefined || yieldQty !== undefined || yieldUnit !== undefined || targetMargin !== undefined;
 
     if (!hasAtLeastOneField) {
       throw new BadRequest('At least one field must be provided');
@@ -35,6 +35,7 @@ export class UpdateProductUseCase {
       name,
       yieldQty,
       yieldUnit,
+      targetMargin,
     });
 
     return {
@@ -44,6 +45,7 @@ export class UpdateProductUseCase {
         yieldQty: updated.yieldQty,
         yieldUnit: updated.yieldUnit,
         salePrice: updated.salePrice,
+        targetMargin: updated.targetMargin,
       },
     };
   }
@@ -56,6 +58,7 @@ export namespace UpdateProductUseCase {
     name?: string;
     yieldQty?: number;
     yieldUnit?: PackageUnit;
+    targetMargin?: number | null;
   }
 
   export type Output = {
@@ -65,6 +68,7 @@ export namespace UpdateProductUseCase {
       yieldQty: number;
       yieldUnit: PackageUnit;
       salePrice: number;
+      targetMargin: number | null;
     };
   }
 }

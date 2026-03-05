@@ -41,6 +41,7 @@ export class GetProductFinancialsUseCase {
         yieldQty: product.yieldQty,
         yieldUnit: product.yieldUnit,
         salePrice: Number(product.salePrice),
+        targetMargin: product.targetMargin ? Number(product.targetMargin) : null,
         createdAt: product.createdAt,
         items,
         financials,
@@ -62,6 +63,7 @@ export namespace GetProductFinancialsUseCase {
       yieldQty: number;
       yieldUnit: string;
       salePrice: number;
+      targetMargin: number | null;
       createdAt: Date;
       items: Array<{
         ingredientId: string;
@@ -75,6 +77,7 @@ export namespace GetProductFinancialsUseCase {
         unitCost: number;
         grossProfit: number;
         profitMargin: number;
+        suggestedPrice: number | null;
       };
     };
   };

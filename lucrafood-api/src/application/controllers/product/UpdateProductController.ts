@@ -22,7 +22,7 @@ export class UpdateProductController extends Controller<
     Controller.Response<UpdateProductController.Response>
   > {
     const { productId } = params;
-    const { name, yieldQty, yieldUnit } = body.product;
+    const { name, yieldQty, yieldUnit, targetMargin } = body.product;
 
     const result = await this.updateProductUseCase.execute({
       accountId,
@@ -30,6 +30,7 @@ export class UpdateProductController extends Controller<
       name,
       yieldQty,
       yieldUnit,
+      targetMargin,
     });
 
     return { statusCode: 200, body: result };
