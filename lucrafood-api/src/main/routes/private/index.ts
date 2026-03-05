@@ -1,4 +1,5 @@
 import { FastifyPluginAsync } from 'fastify';
+import { analyticsRoutes } from './analytics';
 import { ingredientsRoutes } from './ingredient';
 import { usersRoutes } from './me';
 import { productRoutes } from './product';

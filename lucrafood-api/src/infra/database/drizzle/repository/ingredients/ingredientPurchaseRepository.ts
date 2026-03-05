@@ -52,6 +52,17 @@ export class ingredientPurchaseRepository {
     return result;
   }
 
+  async findAllByIngredient(input: { ingredientId: string, accountId: string }) {
+    return this.db.client
+      .select()
+      .from(ingredientPurchases)
+      .where(and(
+        eq(ingredientPurchases.ingredientId, input.ingredientId),
+        eq(ingredientPurchases.accountId, input.accountId),
+      ))
+      .orderBy(ingredientPurchases.purchasedAt);
+  }
+
   async findAllByIngredientIds({ ingredientIds, accountId }: { ingredientIds: string[], accountId: string }) {
     return this.db.client
       .select()
