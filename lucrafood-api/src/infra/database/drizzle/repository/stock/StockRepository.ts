@@ -10,16 +10,22 @@ import { ingredients } from '../../schemas/ingredients';
 import { productStock } from '../../schemas/productStock';
 import { products } from '../../schemas/products';
 
+type Executor = DrizzleClient['client'] | DrizzleClient.Transaction;
+
 @Injectable()
 export class StockRepository {
   constructor(private readonly db: DrizzleClient) { }
+
+  private executor(tx?: DrizzleClient.Transaction): Executor {
+    return tx ?? this.db.client;
+  }
 
   // ========================
   // Ingredient Stock
   // ========================
 
   async findAllIngredientStock(accountId: string): Promise<StockRepository.IngredientStockRow[]> {
-    const rows = await this.db.client
+    return this.db.client
       .select({
         id: ingredientStock.id,
         ingredientId: ingredientStock.ingredientId,
@@ -32,12 +38,10 @@ export class StockRepository {
       .from(ingredientStock)
       .innerJoin(ingredients, eq(ingredients.id, ingredientStock.ingredientId))
       .where(eq(ingredientStock.accountId, accountId));
-
-    return rows;
   }
 
-  async findIngredientStock(input: { ingredientId: string, accountId: string }): Promise<StockRepository.IngredientStockRow | null> {
-    const [row] = await this.db.client
+  async findIngredientStock(input: { ingredientId: string, accountId: string }, tx?: DrizzleClient.Transaction): Promise<StockRepository.IngredientStockRow | null> {
+    const [row] = await this.executor(tx)
       .select({
         id: ingredientStock.id,
         ingredientId: ingredientStock.ingredientId,
@@ -64,8 +68,8 @@ export class StockRepository {
     currentQty: number;
     minQty: number;
     unit: PackageUnit;
-  }) {
-    const [row] = await this.db.client
+  }, tx?: DrizzleClient.Transaction) {
+    const [row] = await this.executor(tx)
       .insert(ingredientStock)
       .values({
         ingredientId: input.ingredientId,
@@ -98,8 +102,8 @@ export class StockRepository {
     accountId: string;
     qtyToAdd: number;
     unit: PackageUnit;
-  }) {
-    const [row] = await this.db.client
+  }, tx?: DrizzleClient.Transaction) {
+    const [row] = await this.executor(tx)
       .insert(ingredientStock)
       .values({
         ingredientId: input.ingredientId,
@@ -129,8 +133,8 @@ export class StockRepository {
     ingredientId: string;
     accountId: string;
     qtyToSubtract: number;
-  }) {
-    const [row] = await this.db.client
+  }, tx?: DrizzleClient.Transaction) {
+    const [row] = await this.executor(tx)
       .update(ingredientStock)
       .set({
         currentQty: sql`${ingredientStock.currentQty}::numeric - ${input.qtyToSubtract.toFixed(3)}::numeric`,
@@ -150,7 +154,7 @@ export class StockRepository {
   // ========================
 
   async findAllProductStock(accountId: string): Promise<StockRepository.ProductStockRow[]> {
-    const rows = await this.db.client
+    return this.db.client
       .select({
         id: productStock.id,
         productId: productStock.productId,
@@ -163,8 +167,6 @@ export class StockRepository {
       .from(productStock)
       .innerJoin(products, eq(products.id, productStock.productId))
       .where(eq(productStock.accountId, accountId));
-
-    return rows;
   }
 
   async upsertProductStock(input: {
@@ -173,8 +175,8 @@ export class StockRepository {
     currentQty: number;
     minQty: number;
     unit: PackageUnit;
-  }) {
-    const [row] = await this.db.client
+  }, tx?: DrizzleClient.Transaction) {
+    const [row] = await this.executor(tx)
       .insert(productStock)
       .values({
         productId: input.productId,
@@ -207,8 +209,8 @@ export class StockRepository {
     accountId: string;
     qtyToAdd: number;
     unit: PackageUnit;
-  }) {
-    const [row] = await this.db.client
+  }, tx?: DrizzleClient.Transaction) {
+    const [row] = await this.executor(tx)
       .insert(productStock)
       .values({
         productId: input.productId,
