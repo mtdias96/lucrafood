@@ -5,6 +5,7 @@ import { UnitPriceService } from '@application/service/UnitBaseCalculator';
 import { ingredientPurchaseRepository } from '@infra/database/drizzle/repository/ingredients/ingredientPurchaseRepository';
 import { IngredientRepository } from '@infra/database/drizzle/repository/ingredients/IngredientRepository';
 import { IngredientStoreRepository } from '@infra/database/drizzle/repository/ingredients/IngredientStoreRepository';
+import { StockRepository } from '@infra/database/drizzle/repository/stock/StockRepository';
 
 import { Injectable } from '@kernel/decorators/Injactable';
 import { PackageUnit } from '@shared/types/PackageUnit';
@@ -15,6 +16,7 @@ export class CreateIngredientPurchaseUseCase {
     private readonly ingredientRepository: IngredientRepository,
     private readonly ingredientPurchaseRepository: ingredientPurchaseRepository,
     private readonly ingredientStoreRepository: IngredientStoreRepository,
+    private readonly stockRepository: StockRepository,
   ) { };
 
   async execute(input: CreateIngredientPurchaseUseCase.Input): Promise<CreateIngredientPurchaseUseCase.Output> {
@@ -38,6 +40,15 @@ export class CreateIngredientPurchaseUseCase {
     const purchase = new IngredientPurchase({ ingredientId, accountId, storeId, packageQty, packageUnit, totalPrice, unitPrice, purchasedAt });
 
     const created = await this.ingredientPurchaseRepository.create(purchase);
+
+    const baseQty = UnitPriceService.toBaseQty(packageQty, packageUnit);
+
+    await this.stockRepository.incrementIngredientStock({
+      ingredientId,
+      accountId,
+      qtyToAdd: baseQty,
+      unit: packageUnit,
+    });
 
     return {
       ingredientPurchase: created,
