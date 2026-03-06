@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 60" width="280" height="60">
+  <defs>
+    <linearGradient id="brandGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#10B981"/>
+      <stop offset="100%" style="stop-color:#059669"/>
+    </linearGradient>
+  </defs>
+  <!-- Icon: coin + fork -->
+  <circle cx="28" cy="30" r="24" fill="url(#brandGrad)"/>
+  <circle cx="28" cy="30" r="19" fill="none" stroke="#fff" stroke-width="1.5" opacity="0.4"/>
+  <text x="28" y="37" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" font-weight="700" fill="#fff">$</text>
+  <!-- Wordmark -->
+  <text x="64" y="40" font-family="Arial, Helvetica, sans-serif" font-size="32" font-weight="800" fill="#111827" letter-spacing="-0.5">
+    Lucra<tspan fill="url(#brandGrad)">Food</tspan>
+  </text>
+</svg>
