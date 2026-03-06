@@ -5,7 +5,7 @@ import { useSignIn } from '@/app/hooks/useSignIn'
 import { getApiErrorMessage } from '@/app/utils/getApiErrorMessage'
 
 const signInSchema = z.object({
-  email: z.email('Informe um e-mail valido'),
+  email: z.email('Informe um e-mail válido'),
   password: z.string().min(8, 'A senha deve ter pelo menos 8 caracteres'),
 })
 
@@ -20,10 +20,10 @@ export function useSignInController() {
     resolver: zodResolver(signInSchema),
   })
 
-  const { mutateAsync, isPending, error } = useSignIn()
+  const { mutate, isPending, error } = useSignIn()
 
-  const onSubmit = handleSubmit(async (data) => {
-    await mutateAsync({
+  const onSubmit = handleSubmit((data) => {
+    mutate({
       account: {
         email: data.email,
         password: data.password,

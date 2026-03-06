@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom'
+import { Mail, Lock, User, Loader2 } from 'lucide-react'
 import { Button } from '@/view/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/view/components/ui/card'
 import { Input } from '@/view/components/ui/input'
+import { AuthLayout } from '@/view/layouts/AuthLayout'
 import type { UseFormRegisterReturn } from 'react-hook-form'
 
 interface SignUpViewProps {
@@ -22,78 +23,92 @@ interface SignUpViewProps {
 
 export function SignUpView({ register, onSubmit, errors, isPending, apiError }: SignUpViewProps) {
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-background">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Criar conta</CardTitle>
-          <CardDescription>Preencha os dados para se cadastrar</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={onSubmit} className="space-y-4">
-            {apiError && (
-              <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-                {apiError}
-              </div>
-            )}
+    <AuthLayout
+      title="Crie sua conta"
+      subtitle="Comece a controlar seus custos e maximizar lucros"
+    >
+      <form onSubmit={onSubmit} className="space-y-5">
+        {apiError && (
+          <div className="rounded-lg bg-destructive/10 border border-destructive/20 p-3.5 text-sm text-destructive">
+            {apiError}
+          </div>
+        )}
 
-            <div className="space-y-2">
-              <label htmlFor="name" className="text-sm font-medium text-foreground">
-                Nome
-              </label>
-              <Input
-                id="name"
-                type="text"
-                placeholder="Seu nome completo"
-                {...register.name}
-              />
-              {errors.name && (
-                <p className="text-sm text-destructive">{errors.name.message}</p>
-              )}
-            </div>
+        <div className="space-y-1.5">
+          <label htmlFor="name" className="text-sm font-medium text-foreground">
+            Nome completo
+          </label>
+          <div className="relative">
+            <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              id="name"
+              type="text"
+              placeholder="Seu nome"
+              className="pl-10"
+              {...register.name}
+            />
+          </div>
+          {errors.name && (
+            <p className="text-xs text-destructive mt-1">{errors.name.message}</p>
+          )}
+        </div>
 
-            <div className="space-y-2">
-              <label htmlFor="email" className="text-sm font-medium text-foreground">
-                E-mail
-              </label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="seu@email.com"
-                {...register.email}
-              />
-              {errors.email && (
-                <p className="text-sm text-destructive">{errors.email.message}</p>
-              )}
-            </div>
+        <div className="space-y-1.5">
+          <label htmlFor="email" className="text-sm font-medium text-foreground">
+            E-mail
+          </label>
+          <div className="relative">
+            <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              id="email"
+              type="email"
+              placeholder="seu@email.com"
+              className="pl-10"
+              {...register.email}
+            />
+          </div>
+          {errors.email && (
+            <p className="text-xs text-destructive mt-1">{errors.email.message}</p>
+          )}
+        </div>
 
-            <div className="space-y-2">
-              <label htmlFor="password" className="text-sm font-medium text-foreground">
-                Senha
-              </label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="Minimo 8 caracteres"
-                {...register.password}
-              />
-              {errors.password && (
-                <p className="text-sm text-destructive">{errors.password.message}</p>
-              )}
-            </div>
+        <div className="space-y-1.5">
+          <label htmlFor="password" className="text-sm font-medium text-foreground">
+            Senha
+          </label>
+          <div className="relative">
+            <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              id="password"
+              type="password"
+              placeholder="Mínimo 8 caracteres"
+              className="pl-10"
+              {...register.password}
+            />
+          </div>
+          {errors.password && (
+            <p className="text-xs text-destructive mt-1">{errors.password.message}</p>
+          )}
+        </div>
 
-            <Button type="submit" className="w-full" disabled={isPending}>
-              {isPending ? 'Criando conta...' : 'Criar conta'}
-            </Button>
+        <Button type="submit" className="w-full" size="lg" disabled={isPending}>
+          {isPending ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Criando conta...
+            </>
+          ) : (
+            'Criar conta'
+          )}
+        </Button>
 
-            <p className="text-center text-sm text-muted-foreground">
-              Ja tem uma conta?{' '}
-              <Link to="/signin" className="text-primary font-medium hover:underline">
-                Entrar
-              </Link>
-            </p>
-          </form>
-        </CardContent>
-      </Card>
-    </div>
+        <p className="text-center text-sm text-muted-foreground">
+          Já tem uma conta?{' '}
+          <Link to="/signin" className="text-primary font-semibold hover:underline">
+            Entrar
+          </Link>
+        </p>
+      </form>
+    </AuthLayout>
   )
 }
