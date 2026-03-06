@@ -1,5 +1,7 @@
+export * from '../enums/AlertType';
 export * from '../enums/Unit';
 export * from './accounts';
+export * from './alerts';
 export * from './ingredients';
 export * from './ingredientsPurchase';
 export * from './ingredientStock';
@@ -10,6 +12,7 @@ export * from './relations';
 export * from './store';
 
 import * as accounts from './accounts';
+import * as alertsSchema from './alerts';
 import * as ingredientStockSchema from './ingredientStock';
 import * as ingredients from './ingredients';
 import * as ingredientPurchases from './ingredientsPurchase';
@@ -21,6 +24,7 @@ import * as stores from './store';
 
 export const schema = {
   ...accounts,
+  ...alertsSchema,
   ...ingredients,
   ...ingredientPurchases,
   ...ingredientStockSchema,
