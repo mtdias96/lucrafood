@@ -2,6 +2,7 @@ import 'dotenv/config';
 import 'reflect-metadata';
 
 import Fastify from 'fastify';
+import cors from '@fastify/cors';
 
 import { errorHandlerPlugin } from '@main/plugins/errorHandler';
 import { jwtPlugin } from '@main/plugins/jwtPlugin';
@@ -9,6 +10,10 @@ import { routes } from '@main/routes';
 
 async function bootstrap() {
   const fastify = Fastify({ logger: true });
+
+  await fastify.register(cors, {
+    origin: true,
+  });
 
   await fastify.register(errorHandlerPlugin);
 
