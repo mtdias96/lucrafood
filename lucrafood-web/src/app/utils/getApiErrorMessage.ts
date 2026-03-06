@@ -2,26 +2,26 @@ import axios from 'axios'
 
 const ERROR_MESSAGES: Record<string, Record<number, string>> = {
   CONFLICT: {
-    409: 'Este e-mail ja esta em uso. Tente outro.',
+    409: 'Este e-mail já está em uso. Tente outro.',
   },
   UNAUTHORIZED: {
     401: 'E-mail ou senha incorretos.',
   },
   VALIDATION: {
-    400: 'Dados invalidos. Verifique os campos e tente novamente.',
+    400: 'Dados inválidos. Verifique os campos e tente novamente.',
   },
   FORBIDDEN: {
-    403: 'Voce nao tem permissao para realizar esta acao.',
+    403: 'Você não tem permissão para realizar esta ação.',
   },
 }
 
 const GENERIC_MESSAGES: Record<number, string> = {
-  400: 'Dados invalidos. Verifique os campos e tente novamente.',
+  400: 'Dados inválidos. Verifique os campos e tente novamente.',
   401: 'E-mail ou senha incorretos.',
-  403: 'Voce nao tem permissao para realizar esta acao.',
-  404: 'Recurso nao encontrado.',
-  409: 'Este registro ja existe.',
-  422: 'Nao foi possivel processar a solicitacao.',
+  403: 'Você não tem permissão para realizar esta ação.',
+  404: 'Recurso não encontrado.',
+  409: 'Este registro já existe.',
+  422: 'Não foi possível processar a solicitação.',
   429: 'Muitas tentativas. Aguarde um momento e tente novamente.',
   500: 'Erro interno do servidor. Tente novamente mais tarde.',
 }

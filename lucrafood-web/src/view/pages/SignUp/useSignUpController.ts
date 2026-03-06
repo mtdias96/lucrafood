@@ -6,7 +6,7 @@ import { getApiErrorMessage } from '@/app/utils/getApiErrorMessage'
 
 const signUpSchema = z.object({
   name: z.string().min(2, 'O nome deve ter pelo menos 2 caracteres'),
-  email: z.email('Informe um e-mail valido'),
+  email: z.email('Informe um e-mail válido'),
   password: z.string().min(8, 'A senha deve ter pelo menos 8 caracteres'),
 })
 
@@ -21,10 +21,10 @@ export function useSignUpController() {
     resolver: zodResolver(signUpSchema),
   })
 
-  const { mutateAsync, isPending, error } = useSignUp()
+  const { mutate, isPending, error } = useSignUp()
 
-  const onSubmit = handleSubmit(async (data) => {
-    await mutateAsync({
+  const onSubmit = handleSubmit((data) => {
+    mutate({
       account: {
         name: data.name,
         email: data.email,
