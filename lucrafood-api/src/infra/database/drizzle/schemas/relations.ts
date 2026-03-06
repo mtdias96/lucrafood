@@ -1,6 +1,7 @@
 // src/infra/db/drizzle/relations.ts
 import { relations } from 'drizzle-orm';
 import { accounts } from './accounts';
+import { alerts } from './alerts';
 import { ingredients } from './ingredients';
 import { ingredientPurchases } from './ingredientsPurchase';
 import { ingredientStock } from './ingredientStock';
@@ -17,6 +18,17 @@ export const accountsRelations = relations(accounts, ({ many }) => ({
   ingredients: many(ingredients),
   stores: many(stores),
   products: many(products),
+  alerts: many(alerts),
+}));
+
+// =============
+// Alerts
+// =============
+export const alertsRelations = relations(alerts, ({ one }) => ({
+  account: one(accounts, {
+    fields: [alerts.accountId],
+    references: [accounts.id],
+  }),
 }));
 
 // =============

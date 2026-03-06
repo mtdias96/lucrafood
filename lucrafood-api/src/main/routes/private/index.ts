@@ -1,4 +1,5 @@
 import { FastifyPluginAsync } from 'fastify';
+import { alertsRoutes } from './alerts';
 import { analyticsRoutes } from './analytics';
 import { ingredientsRoutes } from './ingredient';
 import { usersRoutes } from './me';
@@ -16,5 +17,6 @@ export const privateRoutes: FastifyPluginAsync = async (fastify) => {
   fastify.register(storeRoutes);
   fastify.register(stockRoutes);
   fastify.register(simulationRoutes);
+  fastify.register(alertsRoutes);
 };
 
