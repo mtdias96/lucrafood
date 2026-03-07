@@ -2,10 +2,10 @@ import { Controller } from '@application/contracts/Controller';
 import { UpdateProductSalePriceUseCase } from '@application/usecases/product/UpdateProductSalePriceUseCase';
 import { Injectable } from '@kernel/decorators/Injactable';
 import { Schema } from '@kernel/decorators/Schema';
-import { ProductUpdateSalePiceBody, productUpdateSalePiceSchema } from './schemas/productUpdateSalePiceSchema';
+import { ProductUpdateSalePriceBody, productUpdateSalePriceSchema } from './schemas/productUpdateSalePriceSchema';
 
 @Injectable()
-@Schema(productUpdateSalePiceSchema)
+@Schema(productUpdateSalePriceSchema)
 export class UpdateProductSalePriceController extends Controller<
   'private',
   UpdateProductSalePriceController.Response
@@ -35,7 +35,7 @@ export namespace UpdateProductSalePriceController {
 
   export type Request = Controller.Request<
     'private',
-    ProductUpdateSalePiceBody,
+    ProductUpdateSalePriceBody,
     Params
   >;
 
