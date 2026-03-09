@@ -16,6 +16,4 @@ export const ingredientsRoutes: FastifyPluginAsync = async (fastify) => {
 
   fastify.post('/ingredients', fastifyPrivateRouteAdapter(makeCreateIngredientController()));
   fastify.post('/ingredients/:ingredientId/purchases', fastifyPrivateRouteAdapter(makeCreateIngredientPurchaseController()));
-
-  fastify.post('/ingredients-stores', () => { });
 };
