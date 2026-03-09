@@ -2,60 +2,56 @@ import { useCreateIngredient } from '@/app/hooks/useCreateIngredient'
 import { useCreateProduct } from '@/app/hooks/useCreateProduct'
 import { useCreateRecipe } from '@/app/hooks/useCreateRecipe'
 import { useIngredients } from '@/app/hooks/useIngredients'
-import type { PackageUnit } from '@/app/types/product'
+import { useRegisterPurchase } from '@/app/hooks/useRegisterPurchase'
+import {
+  productSchema, type ProductFormData,
+  pricingSchema, type PricingFormData,
+  ingredientSchema, type IngredientFormData,
+} from '@/app/schemas'
+import type { PackageUnit, RecipeIngredient } from '@/app/types/product'
 import { getApiErrorMessage } from '@/app/utils/getApiErrorMessage'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useCallback, useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
+import { useCallback, useState, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
-import { z } from 'zod/v4'
+import { toast } from 'sonner'
 
-const productSchema = z.object({
-  name: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
-  yieldQty: z.number().min(1, 'Rendimento deve ser maior que 0'),
-  yieldUnit: z.enum(['g', 'kg', 'ml', 'l', 'un'] as const),
-  salePrice: z.number().min(0.01, 'Preço de venda deve ser maior que 0'),
-})
+export type { RecipeIngredient }
 
-type ProductFormData = z.infer<typeof productSchema>
-
-export interface RecipeIngredient {
-  ingredientId: string
-  ingredientName: string
-  quantityUsed: number
-  unitUsed: PackageUnit
-}
-
-const ingredientSchema = z.object({
-  name: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
-  baseUnit: z.enum(['g', 'kg', 'ml', 'l', 'un'] as const),
-})
-
-type IngredientFormData = z.infer<typeof ingredientSchema>
+/* ── Controller ───────────────────────────────────────────────── */
 
 export function useCreateProductController(onSuccess: () => void) {
-  const [step, setStep] = useState<1 | 2>(1)
+  const [step, setStep] = useState<1 | 2 | 3>(1)
   const [recipeItems, setRecipeItems] = useState<RecipeIngredient[]>([])
   const [isCreatingIngredient, setIsCreatingIngredient] = useState(false)
+  const [apiError, setApiError] = useState<string | null>(null)
 
-  const { data: ingredientsData } = useIngredients()
-  const ingredients = ingredientsData?.ingredients ?? []
+  const queryClient = useQueryClient()
+  const { data: ingredientsData } = useIngredients({ limit: 50 })
+  const ingredients = useMemo(
+    () => ingredientsData?.ingredients ?? [],
+    [ingredientsData?.ingredients],
+  )
 
   const createProduct = useCreateProduct()
   const createRecipe = useCreateRecipe()
   const createIngredient = useCreateIngredient()
+  const registerPurchase = useRegisterPurchase()
+
+  /* -- Forms --------------------------------------------------- */
 
   const productForm = useForm<ProductFormData>({
     resolver: zodResolver(productSchema),
-    defaultValues: {
-      yieldUnit: 'un',
-    },
+    defaultValues: { yieldUnit: 'un' },
+  })
+
+  const pricingForm = useForm<PricingFormData>({
+    resolver: zodResolver(pricingSchema),
   })
 
   const ingredientForm = useForm<IngredientFormData>({
     resolver: zodResolver(ingredientSchema),
-    defaultValues: {
-      baseUnit: 'g',
-    },
+    defaultValues: { baseUnit: 'g', packageUnit: 'g' },
   })
 
   const [addItemForm, setAddItemForm] = useState({
@@ -64,30 +60,43 @@ export function useCreateProductController(onSuccess: () => void) {
     unitUsed: 'g' as PackageUnit,
   })
 
-  const apiError = createProduct.error
-    ? getApiErrorMessage(createProduct.error, 'Erro ao criar produto.')
-    : createRecipe.error
-      ? getApiErrorMessage(createRecipe.error, 'Erro ao criar receita.')
-      : null
+  /* -- Step navigation ----------------------------------------- */
 
-  const handleNextStep = productForm.handleSubmit(() => {
+  const handleGoToStep2 = productForm.handleSubmit(() => {
+    setApiError(null)
     setStep(2)
   })
 
+  const handleGoToStep3 = useCallback(() => {
+    if (recipeItems.length === 0) {
+      setApiError('Adicione ao menos um ingrediente à receita.')
+      return
+    }
+    setApiError(null)
+    setStep(3)
+  }, [recipeItems])
+
   const handlePrevStep = useCallback(() => {
-    setStep(1)
+    setApiError(null)
+    setStep((prev) => (prev > 1 ? (prev - 1) as 1 | 2 | 3 : prev))
   }, [])
 
+  /* -- Recipe items -------------------------------------------- */
+
   const handleAddRecipeItem = useCallback(() => {
+    setApiError(null)
     if (!addItemForm.ingredientId || !addItemForm.quantityUsed) return
 
     const ingredient = ingredients.find((i) => i.id === addItemForm.ingredientId)
-    if (!ingredient) return
+    if (!ingredient) {
+      setApiError('Ingrediente não encontrado ou indisponível.')
+      return
+    }
 
-    const alreadyAdded = recipeItems.some(
-      (item) => item.ingredientId === addItemForm.ingredientId,
-    )
-    if (alreadyAdded) return
+    if (recipeItems.some((item) => item.ingredientId === addItemForm.ingredientId)) {
+      setApiError('Este ingrediente já foi adicionado na receita.')
+      return
+    }
 
     setRecipeItems((prev) => [
       ...prev,
@@ -99,40 +108,55 @@ export function useCreateProductController(onSuccess: () => void) {
       },
     ])
 
-    setAddItemForm({
-      ingredientId: '',
-      quantityUsed: '',
-      unitUsed: 'g',
-    })
+    setAddItemForm({ ingredientId: '', quantityUsed: '', unitUsed: 'g' })
   }, [addItemForm, ingredients, recipeItems])
 
   const handleRemoveRecipeItem = useCallback((ingredientId: string) => {
     setRecipeItems((prev) => prev.filter((item) => item.ingredientId !== ingredientId))
   }, [])
 
+  /* -- Create ingredient inline -------------------------------- */
+
   const handleCreateIngredient = ingredientForm.handleSubmit(async (data) => {
     try {
-      await createIngredient.mutateAsync({
-        ingredients: {
-          name: data.name,
-          baseUnit: data.baseUnit,
+      const { ingredient } = await createIngredient.mutateAsync({
+        ingredients: { name: data.name, baseUnit: data.baseUnit },
+      })
+
+      await registerPurchase.mutateAsync({
+        ingredientId: ingredient.id,
+        ingredientPurchase: {
+          storeId: null,
+          packageQty: data.packageQty,
+          packageUnit: data.packageUnit,
+          totalPrice: data.totalPrice,
         },
       })
+
+      await queryClient.refetchQueries({ queryKey: ['ingredients'] })
+
       ingredientForm.reset()
       setIsCreatingIngredient(false)
-    } catch {
-      // Error handled by apiError
+      toast.success('Ingrediente e preço registrados com sucesso!')
+    } catch (err) {
+      toast.error(getApiErrorMessage(err, 'Erro ao criar ingrediente.'))
     }
   })
 
-  const handleSubmit = productForm.handleSubmit(async (data) => {
+  /* -- Final submit -------------------------------------------- */
+
+  const handleSubmit = pricingForm.handleSubmit(async (pricingData) => {
+    const productData = productForm.getValues()
+    setApiError(null)
+
     try {
       const result = await createProduct.mutateAsync({
         product: {
-          name: data.name,
-          yieldQty: data.yieldQty,
-          yieldUnit: data.yieldUnit,
-          salePrice: data.salePrice,
+          name: productData.name,
+          yieldQty: productData.yieldQty,
+          yieldUnit: productData.yieldUnit,
+          salePrice: pricingData.salePrice,
+          targetMargin: pricingData.targetMargin,
         },
       })
 
@@ -147,28 +171,37 @@ export function useCreateProductController(onSuccess: () => void) {
         })
       }
 
-      // Reset everything
-      productForm.reset()
-      setRecipeItems([])
-      setStep(1)
+      await queryClient.refetchQueries({ queryKey: ['products'] })
+
+      toast.success('Produto criado com sucesso!')
+      handleReset()
       onSuccess()
-    } catch {
-      // Error handled by apiError
+    } catch (err) {
+      const message = getApiErrorMessage(err, 'Erro ao criar produto.')
+      setApiError(message)
+      toast.error(message)
     }
   })
 
+  /* -- Reset --------------------------------------------------- */
+
   const handleReset = useCallback(() => {
     productForm.reset()
+    pricingForm.reset()
     ingredientForm.reset()
     setRecipeItems([])
     setStep(1)
     setIsCreatingIngredient(false)
+    setApiError(null)
     setAddItemForm({ ingredientId: '', quantityUsed: '', unitUsed: 'g' })
-  }, [productForm, ingredientForm])
+  }, [productForm, pricingForm, ingredientForm])
+
+  /* -- Public API ---------------------------------------------- */
 
   return {
     step,
     productForm,
+    pricingForm,
     ingredientForm,
     ingredients,
     recipeItems,
@@ -178,8 +211,9 @@ export function useCreateProductController(onSuccess: () => void) {
     setIsCreatingIngredient,
     apiError,
     isPending: createProduct.isPending || createRecipe.isPending,
-    isCreatingIngredientPending: createIngredient.isPending,
-    handleNextStep,
+    isCreatingIngredientPending: createIngredient.isPending || registerPurchase.isPending,
+    handleGoToStep2,
+    handleGoToStep3,
     handlePrevStep,
     handleAddRecipeItem,
     handleRemoveRecipeItem,

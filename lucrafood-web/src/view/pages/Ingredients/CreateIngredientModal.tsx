@@ -1,3 +1,4 @@
+import { Loader2 } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -11,83 +12,133 @@ import {
   Label,
   Select,
 } from '@/view/components/ui'
+import { UNIT_OPTIONS } from '@/app/config/constants'
 import { useCreateIngredientController } from './useCreateIngredientController'
-import { Loader2 } from 'lucide-react'
 
 interface CreateIngredientModalProps {
   open: boolean
   onClose: () => void
 }
 
-const UNIT_OPTIONS = [
-  { value: 'g', label: 'Gramas (g)' },
-  { value: 'kg', label: 'Quilogramas (kg)' },
-  { value: 'ml', label: 'Mililitros (ml)' },
-  { value: 'l', label: 'Litros (l)' },
-  { value: 'un', label: 'Unidade (un)' },
-]
-
 export function CreateIngredientModal({ open, onClose }: CreateIngredientModalProps) {
-  const controller = useCreateIngredientController(() => {
-    onClose()
-  })
+  const controller = useCreateIngredientController(onClose)
 
   const handleClose = () => {
-    controller.reset()
+    controller.form.reset()
     onClose()
   }
 
   return (
     <Dialog open={open} onClose={handleClose}>
-      <DialogContent>
+      <DialogContent className="max-w-md">
         <DialogCloseButton onClose={handleClose} />
         <DialogHeader>
-          <DialogTitle>Novo Ingrediente</DialogTitle>
+          <DialogTitle>Novo ingrediente</DialogTitle>
           <DialogDescription>
-            Cadastre um novo ingrediente para usa-lo em suas receitas.
+            Crie um ingrediente para poder compor as receitas dos seus produtos.
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={controller.onSubmit} className="space-y-4">
-          {controller.apiError && (
-            <div className="rounded-lg bg-destructive/10 border border-destructive/20 p-3 text-sm text-destructive">
-              {controller.apiError}
-            </div>
-          )}
+        {controller.apiError && (
+          <div className="rounded-lg bg-destructive/10 border border-destructive/20 p-3 text-sm text-destructive">
+            {controller.apiError}
+          </div>
+        )}
 
+        <form onSubmit={controller.handleSubmit} className="space-y-4">
           <div className="space-y-1.5">
             <Label htmlFor="ingredient-name">Nome do ingrediente</Label>
             <Input
               id="ingredient-name"
-              placeholder="Ex: Açúcar Refinado"
-              disabled={controller.isPending}
-              {...controller.register('name')}
+              placeholder="Ex: Farinha de Trigo"
+              {...controller.form.register('name')}
             />
-            {controller.errors.name && (
-              <p className="text-xs text-destructive">{controller.errors.name.message}</p>
+            {controller.form.formState.errors.name && (
+              <p className="text-xs text-destructive">
+                {controller.form.formState.errors.name.message}
+              </p>
             )}
           </div>
 
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label htmlFor="base-unit">Unidade base</Label>
+              <Select id="base-unit" {...controller.form.register('baseUnit')}>
+                {UNIT_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </Select>
+              {controller.form.formState.errors.baseUnit && (
+                <p className="text-xs text-destructive">
+                  {controller.form.formState.errors.baseUnit.message}
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="total-price">Preço total pago (R$)</Label>
+              <Input
+                id="total-price"
+                type="number"
+                step="0.01"
+                placeholder="0,00"
+                {...controller.form.register('totalPrice', { valueAsNumber: true })}
+              />
+              {controller.form.formState.errors.totalPrice && (
+                <p className="text-xs text-destructive">
+                  {controller.form.formState.errors.totalPrice.message}
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label htmlFor="package-qty">Qtd. na embalagem</Label>
+              <Input
+                id="package-qty"
+                type="number"
+                step="any"
+                placeholder="1"
+                {...controller.form.register('packageQty', { valueAsNumber: true })}
+              />
+              {controller.form.formState.errors.packageQty && (
+                <p className="text-xs text-destructive">
+                  {controller.form.formState.errors.packageQty.message}
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="package-unit">Unidade da embalagem</Label>
+              <Select id="package-unit" {...controller.form.register('packageUnit')}>
+                {UNIT_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </Select>
+              {controller.form.formState.errors.packageUnit && (
+                <p className="text-xs text-destructive">
+                  {controller.form.formState.errors.packageUnit.message}
+                </p>
+              )}
+            </div>
+          </div>
+
           <div className="space-y-1.5">
-            <Label htmlFor="ingredient-unit">Unidade base de medida</Label>
-            <Select
-              id="ingredient-unit"
-              disabled={controller.isPending}
-              {...controller.register('baseUnit')}
-            >
-              {UNIT_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
+            <Label htmlFor="store-id">Loja / Fornecedor (Opcional)</Label>
+            <Select id="store-id" {...controller.form.register('storeId')}>
+              <option value="">Selecione uma loja</option>
+              {controller.stores.map((store) => (
+                <option key={store.id} value={store.id}>{store.name}</option>
               ))}
             </Select>
-            <p className="text-xs text-muted-foreground mt-1">
-              Como você controla o estoque dessa matéria-prima?
+            <p className="text-[10px] text-muted-foreground">
+              Dica: Cadastre suas lojas no menu "Lojas" para acompanhar o histórico por estabelecimento.
             </p>
           </div>
 
-          <DialogFooter className="mt-6">
-            <Button type="button" variant="outline" onClick={handleClose} disabled={controller.isPending}>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={handleClose}>
               Cancelar
             </Button>
             <Button type="submit" disabled={controller.isPending}>
@@ -97,7 +148,7 @@ export function CreateIngredientModal({ open, onClose }: CreateIngredientModalPr
                   Salvando...
                 </>
               ) : (
-                'Salvar Ingrediente'
+                'Cadastrar Ingrediente'
               )}
             </Button>
           </DialogFooter>

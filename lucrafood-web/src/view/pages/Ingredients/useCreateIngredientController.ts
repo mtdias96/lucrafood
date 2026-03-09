@@ -1,54 +1,70 @@
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod/v4'
 import { useCreateIngredient } from '@/app/hooks/useCreateIngredient'
+import { useRegisterPurchase } from '@/app/hooks/useRegisterPurchase'
+import { useStores } from '@/app/hooks/useStores'
+import { ingredientWithStoreSchema, type IngredientWithStoreFormData } from '@/app/schemas'
 import { getApiErrorMessage } from '@/app/utils/getApiErrorMessage'
-
-const createSchema = z.object({
-  name: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
-  baseUnit: z.enum(['g', 'kg', 'ml', 'l', 'un'] as const),
-})
-
-type FormData = z.infer<typeof createSchema>
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useState, useEffect } from 'react'
+import { useForm } from 'react-hook-form'
+import { toast } from 'sonner'
 
 export function useCreateIngredientController(onSuccess: () => void) {
-  const { mutateAsync, isPending, error } = useCreateIngredient()
-  
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm<FormData>({
-    resolver: zodResolver(createSchema),
+  const [apiError, setApiError] = useState<string | null>(null)
+  const createIngredient = useCreateIngredient()
+  const registerPurchase = useRegisterPurchase()
+  const { data: storesData } = useStores()
+
+  const form = useForm<IngredientWithStoreFormData>({
+    resolver: zodResolver(ingredientWithStoreSchema),
     defaultValues: {
       baseUnit: 'g',
+      packageUnit: 'g',
+      storeId: '',
     },
   })
 
-  const onSubmit = handleSubmit(async (data) => {
+  // Sync packageUnit with baseUnit for convenience
+  const baseUnit = form.watch('baseUnit')
+  useEffect(() => {
+    form.setValue('packageUnit', baseUnit)
+  }, [baseUnit, form])
+
+  const handleSubmit = form.handleSubmit(async (data) => {
+    setApiError(null)
+
     try {
-      await mutateAsync({
+      const { ingredient } = await createIngredient.mutateAsync({
         ingredients: {
           name: data.name,
           baseUnit: data.baseUnit,
         },
       })
-      reset()
+
+      await registerPurchase.mutateAsync({
+        ingredientId: ingredient.id,
+        ingredientPurchase: {
+          storeId: data.storeId || null,
+          packageQty: data.packageQty,
+          packageUnit: data.packageUnit,
+          totalPrice: data.totalPrice,
+        },
+      })
+
+      toast.success('Ingrediente e preço registrados com sucesso!')
+      form.reset()
       onSuccess()
-    } catch {
-      // Api Error handling
+    } catch (err) {
+      const message = getApiErrorMessage(err, 'Ocorreu um erro ao processar o ingrediente.')
+      setApiError(message)
+      toast.error(message)
     }
   })
 
-  const apiError = error ? getApiErrorMessage(error, 'Erro ao criar ingrediente.') : null
-
   return {
-    register,
-    onSubmit,
-    errors,
-    isPending,
+    form,
+    handleSubmit,
     apiError,
-    reset,
+    stores: storesData?.stores ?? [],
+    isPending: createIngredient.isPending || registerPurchase.isPending,
   }
 }

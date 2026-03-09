@@ -1,5 +1,12 @@
 export type PackageUnit = 'g' | 'kg' | 'ml' | 'l' | 'un'
 
+export interface RecipeIngredient {
+  ingredientId: string
+  ingredientName: string
+  quantityUsed: number
+  unitUsed: PackageUnit
+}
+
 export interface Product {
   id: string
   name: string
@@ -46,6 +53,7 @@ export interface CreateProductParams {
     yieldQty: number
     yieldUnit: PackageUnit
     salePrice: number
+    targetMargin?: number
   }
 }
 

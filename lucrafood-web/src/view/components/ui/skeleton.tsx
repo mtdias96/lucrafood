@@ -1,14 +1,14 @@
-import * as React from "react"
-import { cn } from "@/app/utils/utils"
+import { cn } from '@/app/utils/utils'
 
-interface SkeletonProps extends React.HTMLAttributes<HTMLDivElement> {}
-
-function Skeleton({ className, ...props }: SkeletonProps) {
+function Skeleton({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
       className={cn(
-        "animate-pulse rounded-lg bg-muted",
-        className
+        'animate-pulse rounded-md bg-muted',
+        className,
       )}
       {...props}
     />

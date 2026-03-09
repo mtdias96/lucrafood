@@ -41,7 +41,9 @@ export const productService = {
 
   async updateSalePrice(params: UpdateSalePriceParams): Promise<void> {
     const { productId, ...body } = params
-    await httpClient.patch(`/products/${productId}/sale-price`, body)
+    await httpClient.patch(`/products/${productId}/sale-price`, {
+      product: body,
+    })
   },
 
   async remove(productId: string): Promise<void> {

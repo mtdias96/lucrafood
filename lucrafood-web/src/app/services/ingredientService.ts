@@ -1,46 +1,57 @@
+import { httpClient } from './httpClient'
 import type {
   CreateIngredientParams,
-  CreatePurchaseParams,
   Ingredient,
   IngredientsResponse,
-  IngredientWithStats,
-  PurchasesResponse,
-} from '@/app/types/ingredient';
-import { httpClient } from './httpClient';
+  RegisterPurchaseParams,
+} from '@/app/types/ingredient'
 
 export const ingredientService = {
-  async getAll(params?: { page?: number; limit?: number }): Promise<IngredientsResponse> {
-
-    const { data } = await httpClient.get('/ingredients', {
-      params: {
-        page: params?.page ?? 1,
-        limit: params?.limit ?? 10
-      }
-    })
-
+  async getAll(
+    params?: { page?: number; limit?: number },
+  ): Promise<IngredientsResponse> {
+    const { data } = await httpClient.get('/ingredients', { params })
     return data
   },
 
-  async getById(ingredientId: string): Promise<IngredientWithStats> {
-    const { data } = await httpClient.get(`/ingredients/${ingredientId}`)
-    return data
-  },
-
-  async create(params: CreateIngredientParams): Promise<{ ingredient: Ingredient }> {
+  async create(
+    params: CreateIngredientParams,
+  ): Promise<{ ingredient: Ingredient }> {
     const { data } = await httpClient.post('/ingredients', params)
     return data
   },
 
-  async getPurchases(
-    ingredientId: string,
-    params?: { page?: number; limit?: number },
-  ): Promise<PurchasesResponse> {
-    const { data } = await httpClient.get(`/ingredients/${ingredientId}/purchases`, { params })
-    return data
-  },
-
-  async createPurchase(params: CreatePurchaseParams): Promise<void> {
+  async registerPurchase(params: RegisterPurchaseParams): Promise<void> {
     const { ingredientId, ...body } = params
     await httpClient.post(`/ingredients/${ingredientId}/purchases`, body)
   },
+
+  async getById(id: string): Promise<IngredientDetailResponse> {
+    const { data } = await httpClient.get(`/ingredients/${id}`)
+    return data
+  },
+}
+
+export interface IngredientStats {
+  currentPrice: number
+  minPrice: number
+  maxPrice: number
+  avgPrice: number
+}
+
+export interface IngredientHistoryItem {
+  id: string
+  totalPrice: number
+  packageQty: number
+  packageUnit: string
+  unitCost: number
+  storeName: string | null
+  createdAt: string
+}
+
+export interface IngredientDetailResponse {
+  ingredient: Ingredient & {
+    stats: IngredientStats
+    history: IngredientHistoryItem[]
+  }
 }

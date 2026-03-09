@@ -15,13 +15,13 @@ export class CreateProductUseCase {
   ) { };
 
   async execute(input: CreateProductUseCase.Input): Promise<CreateProductUseCase.Output> {
-    const { accountId, name, yieldQty, yieldUnit, salePrice } = input;
+    const { accountId, name, yieldQty, yieldUnit, salePrice, targetMargin } = input;
 
     const productAlreadyExists = await this.productRepository.findByName({ name, accountId });
 
     if (productAlreadyExists) { throw new Conflict('Product is already exists'); }
 
-    const product = new Product({ accountId, name, yieldUnit, yieldQty, salePrice });
+    const product = new Product({ accountId, name, yieldUnit, yieldQty, salePrice, targetMargin });
 
     const created = await this.productRepository.create(product);
 
@@ -44,6 +44,7 @@ export namespace CreateProductUseCase {
     yieldQty: number,
     yieldUnit: PackageUnit
     salePrice: number;
+    targetMargin?: number;
   }
 
   export type Output = {

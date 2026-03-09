@@ -1,30 +1,25 @@
-import { useState } from 'react'
 import { useIngredients } from '@/app/hooks/useIngredients'
+import { useCallback, useState } from 'react'
 
 export function useIngredientsController() {
-  const [page, setPage] = useState(1)
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
-  const [purchaseIngredientId, setPurchaseIngredientId] = useState<string | null>(null)
+  const { data: ingredientsData, isLoading } = useIngredients({ limit: 50 })
 
-  const { data, isLoading } = useIngredients({ page, limit: 12 })
+  const ingredients = ingredientsData?.ingredients ?? []
 
-  const handleOpenCreateModal = () => setIsCreateModalOpen(true)
-  const handleCloseCreateModal = () => setIsCreateModalOpen(false)
+  const handleOpenCreateModal = useCallback(() => {
+    setIsCreateModalOpen(true)
+  }, [])
 
-  const handleOpenPurchaseModal = (id: string) => setPurchaseIngredientId(id)
-  const handleClosePurchaseModal = () => setPurchaseIngredientId(null)
+  const handleCloseCreateModal = useCallback(() => {
+    setIsCreateModalOpen(false)
+  }, [])
 
   return {
-    ingredients: data?.ingredients ?? [],
-    meta: data?.meta,
+    ingredients,
     isLoading,
     isCreateModalOpen,
-    purchaseIngredientId,
-    page,
-    setPage,
     handleOpenCreateModal,
     handleCloseCreateModal,
-    handleOpenPurchaseModal,
-    handleClosePurchaseModal,
   }
 }

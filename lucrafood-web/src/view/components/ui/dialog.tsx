@@ -1,6 +1,8 @@
-import * as React from "react"
-import { X } from "lucide-react"
-import { cn } from "@/app/utils/utils"
+import * as React from 'react'
+import { cn } from '@/app/utils/utils'
+import { X } from 'lucide-react'
+
+/* ── Overlay ─────────────────────────────────────────────────── */
 
 interface DialogProps {
   open: boolean
@@ -10,104 +12,112 @@ interface DialogProps {
 
 function Dialog({ open, onClose, children }: DialogProps) {
   React.useEffect(() => {
-    if (open) {
-      document.body.style.overflow = "hidden"
-    } else {
-      document.body.style.overflow = ""
+    if (!open) return
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
     }
-    return () => {
-      document.body.style.overflow = ""
-    }
-  }, [open])
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [open, onClose])
 
   React.useEffect(() => {
-    const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose()
+    if (open) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
     }
-    if (open) document.addEventListener("keydown", handleEsc)
-    return () => document.removeEventListener("keydown", handleEsc)
-  }, [open, onClose])
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [open])
 
   if (!open) return null
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
+      {/* backdrop */}
       <div
         className="fixed inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in-0"
         onClick={onClose}
       />
-      <div className="relative z-50 w-full animate-in fade-in-0 zoom-in-95 slide-in-from-bottom-2 duration-200">
-        {children}
-      </div>
-    </div>
-  )
-}
-
-interface DialogContentProps extends React.HTMLAttributes<HTMLDivElement> {
-  children: React.ReactNode
-}
-
-function DialogContent({ className, children, ...props }: DialogContentProps) {
-  return (
-    <div
-      className={cn(
-        "mx-auto max-w-lg w-full rounded-xl border border-border bg-card p-6 shadow-xl",
-        className
-      )}
-      onClick={(e) => e.stopPropagation()}
-      {...props}
-    >
       {children}
     </div>
   )
 }
 
-interface DialogHeaderProps extends React.HTMLAttributes<HTMLDivElement> {}
+/* ── Content ─────────────────────────────────────────────────── */
 
-function DialogHeader({ className, ...props }: DialogHeaderProps) {
+export type DialogContentProps = React.HTMLAttributes<HTMLDivElement>
+
+const DialogContent = React.forwardRef<HTMLDivElement, DialogContentProps>(
+  ({ className, children, ...props }, ref) => (
+    <div
+      ref={ref}
+      className={cn(
+        'relative z-50 w-full max-w-lg mx-4 rounded-xl border border-border bg-card p-6 shadow-xl animate-in zoom-in-95 fade-in-0 duration-200',
+        className,
+      )}
+      {...props}
+    >
+      {children}
+    </div>
+  ),
+)
+DialogContent.displayName = 'DialogContent'
+
+/* ── Header ──────────────────────────────────────────────────── */
+
+function DialogHeader({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn("flex flex-col space-y-1.5 mb-6", className)}
+      className={cn('flex flex-col gap-1.5 mb-4', className)}
       {...props}
     />
   )
 }
 
-interface DialogTitleProps extends React.HTMLAttributes<HTMLHeadingElement> {}
+/* ── Title ───────────────────────────────────────────────────── */
 
-function DialogTitle({ className, ...props }: DialogTitleProps) {
+function DialogTitle({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLHeadingElement>) {
   return (
     <h2
       className={cn(
-        "text-lg font-semibold leading-none tracking-tight text-foreground",
-        className
+        'text-lg font-semibold leading-none tracking-tight text-foreground',
+        className,
       )}
       {...props}
     />
   )
 }
 
-interface DialogDescriptionProps
-  extends React.HTMLAttributes<HTMLParagraphElement> {}
+/* ── Description ─────────────────────────────────────────────── */
 
-function DialogDescription({ className, ...props }: DialogDescriptionProps) {
+function DialogDescription({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLParagraphElement>) {
   return (
     <p
-      className={cn("text-sm text-muted-foreground", className)}
+      className={cn('text-sm text-muted-foreground', className)}
       {...props}
     />
   )
 }
 
-interface DialogCloseButtonProps {
-  onClose: () => void
-}
+/* ── Close Button ────────────────────────────────────────────── */
 
-function DialogCloseButton({ onClose }: DialogCloseButtonProps) {
+function DialogCloseButton({ onClose }: { onClose: () => void }) {
   return (
     <button
+      type="button"
       onClick={onClose}
-      className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 cursor-pointer"
+      className="absolute right-4 top-4 rounded-md p-1 text-muted-foreground opacity-70 hover:opacity-100 hover:bg-accent transition-all cursor-pointer"
     >
       <X className="h-4 w-4" />
       <span className="sr-only">Fechar</span>
@@ -115,14 +125,17 @@ function DialogCloseButton({ onClose }: DialogCloseButtonProps) {
   )
 }
 
-interface DialogFooterProps extends React.HTMLAttributes<HTMLDivElement> {}
+/* ── Footer ──────────────────────────────────────────────────── */
 
-function DialogFooter({ className, ...props }: DialogFooterProps) {
+function DialogFooter({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
       className={cn(
-        "flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2 mt-6",
-        className
+        'flex flex-col-reverse sm:flex-row sm:justify-end gap-2 mt-6',
+        className,
       )}
       {...props}
     />
@@ -133,8 +146,8 @@ export {
   Dialog,
   DialogContent,
   DialogHeader,
-  DialogFooter,
   DialogTitle,
   DialogDescription,
   DialogCloseButton,
+  DialogFooter,
 }

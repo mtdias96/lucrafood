@@ -1,9 +1,6 @@
 import axios from 'axios'
 
 const ERROR_MESSAGES: Record<string, Record<number, string>> = {
-  CONFLICT: {
-    409: 'Este e-mail já está em uso. Tente outro.',
-  },
   UNAUTHORIZED: {
     401: 'E-mail ou senha incorretos.',
   },

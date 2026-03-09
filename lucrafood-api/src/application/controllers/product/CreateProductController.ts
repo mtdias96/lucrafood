@@ -15,7 +15,7 @@ export class CreateProductController extends Controller<'private', CreateProduct
 
   protected override async handle(request: Controller.Request<'private', ProductBody>): Promise<Controller.Response<CreateProductController.Response>> {
     const { accountId } = request;
-    const { name, yieldQty, yieldUnit, salePrice } = request.body.product;
+    const { name, yieldQty, yieldUnit, salePrice, targetMargin } = request.body.product;
 
     const result = await this.createProductUseCase.execute({
       accountId,
@@ -23,6 +23,7 @@ export class CreateProductController extends Controller<'private', CreateProduct
       yieldQty,
       yieldUnit,
       salePrice,
+      targetMargin,
     });
 
     return {

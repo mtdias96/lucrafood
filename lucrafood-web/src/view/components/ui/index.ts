@@ -12,12 +12,12 @@ export {
   Dialog,
   DialogContent,
   DialogHeader,
-  DialogFooter,
   DialogTitle,
   DialogDescription,
   DialogCloseButton,
+  DialogFooter,
 } from "./dialog"
-export { Label } from "./label"
-export { Badge, type BadgeProps } from "./badge"
-export { Skeleton } from "./skeleton"
 export { Select, type SelectProps } from "./select"
+export { Badge, type BadgeProps } from "./badge"
+export { Label, type LabelProps } from "./label"
+export { Skeleton } from "./skeleton"

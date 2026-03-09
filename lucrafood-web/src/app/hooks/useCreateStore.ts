@@ -7,7 +7,7 @@ export function useCreateStore() {
   return useMutation({
     mutationFn: storeService.create,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['me'] })
+      queryClient.invalidateQueries({ queryKey: ['stores'] })
     },
   })
 }

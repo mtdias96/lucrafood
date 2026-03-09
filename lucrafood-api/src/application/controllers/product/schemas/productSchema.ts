@@ -21,6 +21,13 @@ export const productSchema = z.object({
       .positive({
         message: 'salePrice must be greater than 0',
       }),
+    targetMargin: z.coerce
+      .number({
+        message: 'targetMargin must be a number',
+      })
+      .min(0)
+      .max(100)
+      .optional(),
   }),
 });
 
