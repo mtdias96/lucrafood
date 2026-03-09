@@ -13,17 +13,11 @@ import {
   Badge,
 } from '@/view/components/ui'
 import type { ProductWithFinancials } from '@/app/types/product'
+import { formatCurrency } from '@/app/utils/formatters'
 
 interface ProductCardProps {
   product: ProductWithFinancials
   onDelete: (productId: string) => void
-}
-
-function formatCurrency(value: number): string {
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-  }).format(value)
 }
 
 function getMarginBadge(margin: number): { variant: 'success' | 'warning' | 'destructive'; label: string } {
