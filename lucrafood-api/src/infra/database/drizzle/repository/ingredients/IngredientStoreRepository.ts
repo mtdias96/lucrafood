@@ -49,4 +49,11 @@ export class IngredientStoreRepository {
 
     return row;
   }
+
+  async findAll(input: { accountId: string }): Promise<IngredientStore[]> {
+    return await this.db.client
+      .select()
+      .from(stores)
+      .where(eq(stores.accountId, input.accountId));
+  }
 }
