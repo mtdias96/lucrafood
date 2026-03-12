@@ -9,6 +9,8 @@ import type {
   ProductsResponse,
   ProductsFinancialsResponse,
   ProductWithFinancials,
+  UpdateRecipeItemParams,
+  ProfitHistoryResponse,
 } from '@/app/types/product'
 
 export const productService = {
@@ -58,5 +60,19 @@ export const productService = {
   async addRecipeItems(params: AddRecipeItemParams): Promise<void> {
     const { productId, ...body } = params
     await httpClient.post(`/products/${productId}/recipe-items`, body)
+  },
+
+  async updateRecipeItem(params: UpdateRecipeItemParams): Promise<void> {
+    const { productId, recipeItemId, ...body } = params
+    await httpClient.patch(`/products/${productId}/recipe-items/${recipeItemId}`, body)
+  },
+
+  async removeRecipeItem(productId: string, recipeItemId: string): Promise<void> {
+    await httpClient.delete(`/products/${productId}/recipe-items/${recipeItemId}`)
+  },
+
+  async getProfitHistory(productId: string): Promise<ProfitHistoryResponse> {
+    const { data } = await httpClient.get(`/products/${productId}/profit-history`)
+    return data
   },
 }

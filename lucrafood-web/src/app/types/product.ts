@@ -108,3 +108,28 @@ export interface ProductsFinancialsResponse {
   products: ProductWithFinancials[]
   meta: PaginationMeta & { totalProducts: number }
 }
+
+
+export interface UpdateRecipeItemParams {
+  productId: string
+  recipeItemId: string
+  recipeItem: {
+    quantityUsed: number
+    unitUsed: PackageUnit
+  }
+}
+
+export interface ProfitHistoryEntry {
+  date: string
+  ingredientId: string
+  totalCost: number
+  unitCost: number
+  grossProfit: number
+  profitMargin: number
+}
+
+export interface ProfitHistoryResponse {
+  productId: string
+  productName: string
+  history: ProfitHistoryEntry[]
+}

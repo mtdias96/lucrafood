@@ -1,10 +1,18 @@
-import { ArrowLeft, Calendar, DollarSign, Store, TrendingUp, TrendingDown, Minus } from 'lucide-react'
-import { Link, useParams } from 'react-router-dom'
-import { Button, Skeleton, Card, CardHeader, CardTitle, CardContent } from '@/view/components/ui'
 import { useIngredient } from '@/app/hooks/useIngredient'
 import { formatCurrency } from '@/app/utils/formatters'
+import { Button, Card, CardContent, CardHeader, CardTitle } from '@/view/components/ui'
+import { ArrowLeft, Calendar, DollarSign, Minus, Store, TrendingDown, TrendingUp, LucideIcon } from 'lucide-react'
+import { Link, useParams } from 'react-router-dom'
 
-function StatCard({ title, value, icon: Icon, colorClass = "text-primary", bgClass = "bg-primary/5" }: any) {
+interface StatCardProps {
+  title: string
+  value: number
+  icon: LucideIcon
+  colorClass?: string
+  bgClass?: string
+}
+
+function StatCard({ title, value, icon: Icon, colorClass = "text-primary", bgClass = "bg-primary/5" }: StatCardProps) {
   return (
     <Card className="border-none shadow-sm bg-card/50">
       <CardContent className="p-4">
@@ -21,7 +29,6 @@ function StatCard({ title, value, icon: Icon, colorClass = "text-primary", bgCla
     </Card>
   )
 }
-
 export function IngredientDetailsPage() {
   const { id } = useParams<{ id: string }>()
   const { data, isLoading, error } = useIngredient(id!)

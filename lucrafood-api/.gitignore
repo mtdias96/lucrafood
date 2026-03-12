@@ -1,2 +1,8 @@
 node_modules
 docs
+
+# Agent tools & context
+.claude/
+BACKLOG.md
+INSOMNIA_GUIDE.md
+CLAUDE.md
