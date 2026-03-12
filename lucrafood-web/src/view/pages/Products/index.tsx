@@ -10,6 +10,15 @@ export function ProductsPage() {
     handleOpenCreateModal,
     handleCloseCreateModal,
     handleDeleteProduct,
+    editingRecipeItem,
+    handleEditRecipeItem,
+    handleCloseEditRecipeItem,
+    handleRemoveRecipeItem,
+    isDeletingRecipeItem,
+    profitHistoryProductId,
+    handleViewProfitHistory,
+    handleCloseProfitHistory,
+    currentProductName,
   } = useProductsController()
 
   return (
@@ -19,6 +28,15 @@ export function ProductsPage() {
         isLoading={isLoading}
         onOpenCreateModal={handleOpenCreateModal}
         onDeleteProduct={handleDeleteProduct}
+        editingRecipeItem={editingRecipeItem}
+        onEditRecipeItem={handleEditRecipeItem}
+        onCloseEditRecipeItem={handleCloseEditRecipeItem}
+        onRemoveRecipeItem={handleRemoveRecipeItem}
+        isDeletingRecipeItem={isDeletingRecipeItem}
+        profitHistoryProductId={profitHistoryProductId}
+        onViewProfitHistory={handleViewProfitHistory}
+        onCloseProfitHistory={handleCloseProfitHistory}
+        currentProductName={currentProductName}
       />
 
       <CreateProductModal

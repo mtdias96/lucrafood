@@ -21,6 +21,13 @@ export const pricingSchema = z.object({
 
 export type PricingFormData = z.infer<typeof pricingSchema>
 
+export const recipeItemSchema = z.object({
+  quantityUsed: z.number().min(0.0001, 'Quantidade deve ser maior que 0'),
+  unitUsed: packageUnitEnum,
+})
+
+export type RecipeItemFormData = z.infer<typeof recipeItemSchema>
+
 /* ── Ingredient schemas ──────────────────────────────────────── */
 
 export const ingredientSchema = z.object({

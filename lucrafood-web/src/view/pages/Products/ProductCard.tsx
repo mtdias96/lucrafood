@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import {
   DollarSign,
   TrendingUp,
@@ -5,6 +6,8 @@ import {
   Trash2,
   ChefHat,
   Scale,
+  Pencil,
+  LineChart,
 } from 'lucide-react'
 import {
   Card,
@@ -12,12 +15,16 @@ import {
   CardHeader,
   Badge,
 } from '@/view/components/ui'
-import type { ProductWithFinancials } from '@/app/types/product'
+import type { ProductWithFinancials, RecipeItem } from '@/app/types/product'
 import { formatCurrency } from '@/app/utils/formatters'
 
 interface ProductCardProps {
   product: ProductWithFinancials
   onDelete: (productId: string) => void
+  onEditRecipeItem: (productId: string, item: RecipeItem) => void
+  onRemoveRecipeItem: (productId: string, recipeItemId: string, ingredientName: string) => void
+  onViewProfitHistory: (productId: string) => void
+  isDeletingRecipeItem?: boolean
 }
 
 function getMarginBadge(margin: number): { variant: 'success' | 'warning' | 'destructive'; label: string } {
@@ -26,10 +33,21 @@ function getMarginBadge(margin: number): { variant: 'success' | 'warning' | 'des
   return { variant: 'destructive', label: `${margin.toFixed(1)}% margem` }
 }
 
-export function ProductCard({ product, onDelete }: ProductCardProps) {
+export function ProductCard({
+  product,
+  onDelete,
+  onEditRecipeItem,
+  onRemoveRecipeItem,
+  onViewProfitHistory,
+  isDeletingRecipeItem = false,
+}: ProductCardProps) {
   const { financials } = product
   const marginBadge = getMarginBadge(financials.profitMargin)
   const isProfit = financials.grossProfit > 0
+  const [confirmDelete, setConfirmDelete] = useState<{
+    recipeItemId: string
+    ingredientName: string
+  } | null>(null)
 
   return (
     <Card className="group hover:shadow-lg hover:border-primary/20 transition-all duration-300 hover:-translate-y-0.5 overflow-hidden">
@@ -120,29 +138,90 @@ export function ProductCard({ product, onDelete }: ProductCardProps) {
         {/* Recipe Ingredients */}
         {product.items.length > 0 && (
           <div>
-            <div className="flex items-center gap-1.5 mb-2">
-              <ChefHat className="w-3.5 h-3.5 text-muted-foreground" />
-              <span className="text-xs font-medium text-muted-foreground">
-                Receita ({product.items.length} {product.items.length === 1 ? 'ingrediente' : 'ingredientes'})
-              </span>
+            <div className="flex items-center justify-between gap-1.5 mb-2">
+              <div className="flex items-center gap-1.5">
+                <ChefHat className="w-3.5 h-3.5 text-muted-foreground" />
+                <span className="text-xs font-medium text-muted-foreground">
+                  Receita ({product.items.length} {product.items.length === 1 ? 'ingrediente' : 'ingredientes'})
+                </span>
+              </div>
+              <button
+                onClick={() => onViewProfitHistory(product.id)}
+                className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all duration-200 cursor-pointer"
+                title="Ver histórico de lucro"
+              >
+                <LineChart className="w-3.5 h-3.5" />
+              </button>
             </div>
-            <div className="flex flex-wrap gap-1.5">
+            <div className="space-y-2">
               {product.items.slice(0, 5).map((item) => (
-                <span
+                <div
                   key={item.ingredientId}
-                  className="inline-flex items-center rounded-lg bg-secondary px-2 py-1 text-[11px] font-medium text-secondary-foreground"
+                  className="group/item inline-flex items-center rounded-lg bg-secondary px-2 py-1 text-[11px] font-medium text-secondary-foreground hover:bg-secondary/80 transition-colors"
                 >
                   {item.ingredientName ?? 'Ingrediente'}
                   <span className="ml-1 text-muted-foreground">
                     {item.quantity}{item.unit}
                   </span>
-                </span>
+                  <button
+                    onClick={() => onEditRecipeItem(product.id, item)}
+                    className="ml-2 opacity-0 group-hover/item:opacity-100 p-0.5 rounded text-muted-foreground hover:text-primary transition-colors"
+                    title="Editar"
+                    disabled={isDeletingRecipeItem}
+                  >
+                    <Pencil className="w-2.5 h-2.5" />
+                  </button>
+                  <button
+                    onClick={() =>
+                      setConfirmDelete({
+                        recipeItemId: item.ingredientId,
+                        ingredientName: item.ingredientName || 'Ingrediente',
+                      })
+                    }
+                    className="ml-1 opacity-0 group-hover/item:opacity-100 p-0.5 rounded text-muted-foreground hover:text-destructive transition-colors"
+                    title="Remover"
+                    disabled={isDeletingRecipeItem}
+                  >
+                    <Trash2 className="w-2.5 h-2.5" />
+                  </button>
+                </div>
               ))}
               {product.items.length > 5 && (
                 <span className="inline-flex items-center rounded-lg bg-secondary px-2 py-1 text-[11px] font-medium text-muted-foreground">
                   +{product.items.length - 5}
                 </span>
               )}
+            </div>
+          </div>
+        )}
+
+        {/* Delete Confirmation Dialog */}
+        {confirmDelete && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+            <div className="rounded-lg bg-white p-6 shadow-lg dark:bg-slate-950">
+              <h3 className="font-semibold text-foreground mb-2">Remover ingrediente?</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Tem certeza que deseja remover <strong>{confirmDelete.ingredientName}</strong> da receita?
+              </p>
+              <div className="flex justify-end gap-2">
+                <button
+                  onClick={() => setConfirmDelete(null)}
+                  className="px-3 py-1 rounded text-sm font-medium text-muted-foreground hover:bg-muted transition-colors"
+                  disabled={isDeletingRecipeItem}
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={() => {
+                    onRemoveRecipeItem(product.id, confirmDelete.recipeItemId, confirmDelete.ingredientName)
+                    setConfirmDelete(null)
+                  }}
+                  className="px-3 py-1 rounded text-sm font-medium bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-colors"
+                  disabled={isDeletingRecipeItem}
+                >
+                  {isDeletingRecipeItem ? 'Removendo...' : 'Remover'}
+                </button>
+              </div>
             </div>
           </div>
         )}

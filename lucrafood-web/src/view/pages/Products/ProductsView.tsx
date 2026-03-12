@@ -1,13 +1,24 @@
 import { Plus, Package } from 'lucide-react'
 import { Button, Skeleton } from '@/view/components/ui'
-import type { ProductWithFinancials } from '@/app/types/product'
+import type { ProductWithFinancials, RecipeItem } from '@/app/types/product'
 import { ProductCard } from './ProductCard'
+import { EditRecipeItemModal } from './components/EditRecipeItemModal'
+import { ProfitHistoryModal } from './components/ProfitHistoryModal'
 
 interface ProductsViewProps {
   products: ProductWithFinancials[]
   isLoading: boolean
   onOpenCreateModal: () => void
   onDeleteProduct: (productId: string) => void
+  editingRecipeItem: { productId: string; item: RecipeItem } | null
+  onEditRecipeItem: (productId: string, item: RecipeItem) => void
+  onCloseEditRecipeItem: () => void
+  onRemoveRecipeItem: (productId: string, recipeItemId: string) => void
+  isDeletingRecipeItem: boolean
+  profitHistoryProductId: string | null
+  onViewProfitHistory: (productId: string) => void
+  onCloseProfitHistory: () => void
+  currentProductName?: string
 }
 
 function ProductCardSkeleton() {
@@ -63,6 +74,15 @@ export function ProductsView({
   isLoading,
   onOpenCreateModal,
   onDeleteProduct,
+  editingRecipeItem,
+  onEditRecipeItem,
+  onCloseEditRecipeItem,
+  onRemoveRecipeItem,
+  isDeletingRecipeItem,
+  profitHistoryProductId,
+  onViewProfitHistory,
+  onCloseProfitHistory,
+  currentProductName,
 }: ProductsViewProps) {
   return (
     <div className="p-6 lg:p-8 max-w-7xl mx-auto">
@@ -145,11 +165,30 @@ export function ProductsView({
                 key={product.id}
                 product={product}
                 onDelete={onDeleteProduct}
+                onEditRecipeItem={onEditRecipeItem}
+                onRemoveRecipeItem={onRemoveRecipeItem}
+                onViewProfitHistory={onViewProfitHistory}
+                isDeletingRecipeItem={isDeletingRecipeItem}
               />
             ))}
           </div>
         </>
       )}
+
+      {/* Modals */}
+      <EditRecipeItemModal
+        open={!!editingRecipeItem}
+        onClose={onCloseEditRecipeItem}
+        productId={editingRecipeItem?.productId ?? ''}
+        item={editingRecipeItem?.item ?? null}
+      />
+
+      <ProfitHistoryModal
+        open={!!profitHistoryProductId}
+        onClose={onCloseProfitHistory}
+        productId={profitHistoryProductId}
+        productName={currentProductName}
+      />
     </div>
   )
 }
