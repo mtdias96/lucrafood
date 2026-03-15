@@ -29,7 +29,7 @@ export function ProductStep({ form, onSubmit, onCancel }: ProductStepProps) {
 
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5">
-          <Label htmlFor="yield-qty">Rendimento</Label>
+          <Label htmlFor="yield-qty">Rendimento da receita</Label>
           <Input
             id="yield-qty"
             type="number"
@@ -45,7 +45,7 @@ export function ProductStep({ form, onSubmit, onCancel }: ProductStepProps) {
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="yield-unit">Unidade</Label>
+          <Label htmlFor="yield-unit">Unidade do rendimento</Label>
           <Select id="yield-unit" {...form.register('yieldUnit')}>
             {UNIT_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -53,6 +53,10 @@ export function ProductStep({ form, onSubmit, onCancel }: ProductStepProps) {
           </Select>
         </div>
       </div>
+      <p className="text-xs text-muted-foreground">
+        Quantas unidades ou qual quantidade total a receita produz. Ex: se a receita faz 10 pães, informe 10 un.
+        O custo unitário será calculado dividindo o custo total dos ingredientes por este valor.
+      </p>
 
       <DialogFooter>
         <Button type="button" variant="outline" onClick={onCancel}>

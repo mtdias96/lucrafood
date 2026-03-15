@@ -1,6 +1,6 @@
 import { Plus, ArrowRight, ArrowLeft, Loader2, X } from 'lucide-react'
 import { Button, Input, Label, Select, Badge, DialogFooter } from '@/view/components/ui'
-import { UNIT_OPTIONS } from '@/app/config/constants'
+import { UNIT_OPTIONS, getCompatibleUnits } from '@/app/config/constants'
 import type { UseFormReturn } from 'react-hook-form'
 import type { IngredientFormData } from '@/app/schemas'
 import type { PackageUnit, RecipeIngredient } from '@/app/types/product'
@@ -67,64 +67,85 @@ export function RecipeStep({
           />
         )}
 
-        <div className="grid grid-cols-[1fr_100px_90px_auto] gap-2 items-end">
-          <div className="space-y-1">
-            <Label className="text-xs text-muted-foreground">Ingrediente</Label>
-            <Select
-              value={addItemForm.ingredientId}
-              onChange={(e) =>
-                setAddItemForm((prev) => ({ ...prev, ingredientId: e.target.value }))
-              }
-              disabled={ingredients.length === 0}
-            >
-              {ingredients.length === 0 ? (
-                <option value="" disabled>Nenhum ingrediente cadastrado</option>
-              ) : (
-                <option value="">Selecione...</option>
+        {(() => {
+          const selectedIngredient = ingredients.find(i => i.id === addItemForm.ingredientId)
+          const compatibleUnits = selectedIngredient
+            ? getCompatibleUnits(selectedIngredient.baseUnit as PackageUnit)
+            : UNIT_OPTIONS
+          return (
+            <>
+              <div className="grid grid-cols-[1fr_100px_90px_auto] gap-2 items-end">
+                <div className="space-y-1">
+                  <Label className="text-xs text-muted-foreground">Ingrediente</Label>
+                  <Select
+                    value={addItemForm.ingredientId}
+                    onChange={(e) => {
+                      const ing = ingredients.find(i => i.id === e.target.value)
+                      setAddItemForm((prev) => ({
+                        ...prev,
+                        ingredientId: e.target.value,
+                        unitUsed: (ing?.baseUnit as PackageUnit) || prev.unitUsed,
+                      }))
+                    }}
+                    disabled={ingredients.length === 0}
+                  >
+                    {ingredients.length === 0 ? (
+                      <option value="" disabled>Nenhum ingrediente cadastrado</option>
+                    ) : (
+                      <option value="">Selecione...</option>
+                    )}
+                    {ingredients.map((ing) => (
+                      <option key={ing.id} value={ing.id}>{ing.name}</option>
+                    ))}
+                  </Select>
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs text-muted-foreground">Qtd. usada</Label>
+                  <Input
+                    type="number"
+                    step="any"
+                    placeholder="500"
+                    value={addItemForm.quantityUsed}
+                    onChange={(e) =>
+                      setAddItemForm((prev) => ({ ...prev, quantityUsed: e.target.value }))
+                    }
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs text-muted-foreground">Un.</Label>
+                  <Select
+                    value={addItemForm.unitUsed}
+                    onChange={(e) =>
+                      setAddItemForm((prev) => ({
+                        ...prev,
+                        unitUsed: e.target.value as PackageUnit,
+                      }))
+                    }
+                  >
+                    {compatibleUnits.map((opt) => (
+                      <option key={opt.value} value={opt.value}>{opt.value}</option>
+                    ))}
+                  </Select>
+                </div>
+                <Button
+                  type="button"
+                  size="icon"
+                  onClick={onAddRecipeItem}
+                  disabled={!addItemForm.ingredientId || !addItemForm.quantityUsed}
+                  className="h-11 w-11"
+                >
+                  <Plus className="w-4 h-4" />
+                </Button>
+              </div>
+              {selectedIngredient && (
+                <p className="text-xs text-muted-foreground">
+                  Unidade base do ingrediente: <strong>{selectedIngredient.baseUnit}</strong>.
+                  {' '}Informe a quantidade que a receita utiliza.
+                </p>
               )}
-              {ingredients.map((ing) => (
-                <option key={ing.id} value={ing.id}>{ing.name}</option>
-              ))}
-            </Select>
-          </div>
-          <div className="space-y-1">
-            <Label className="text-xs text-muted-foreground">Qtd.</Label>
-            <Input
-              type="number"
-              step="any"
-              placeholder="500"
-              value={addItemForm.quantityUsed}
-              onChange={(e) =>
-                setAddItemForm((prev) => ({ ...prev, quantityUsed: e.target.value }))
-              }
-            />
-          </div>
-          <div className="space-y-1">
-            <Label className="text-xs text-muted-foreground">Un.</Label>
-            <Select
-              value={addItemForm.unitUsed}
-              onChange={(e) =>
-                setAddItemForm((prev) => ({
-                  ...prev,
-                  unitUsed: e.target.value as PackageUnit,
-                }))
-              }
-            >
-              {UNIT_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>{opt.value}</option>
-              ))}
-            </Select>
-          </div>
-          <Button
-            type="button"
-            size="icon"
-            onClick={onAddRecipeItem}
-            disabled={!addItemForm.ingredientId || !addItemForm.quantityUsed}
-            className="h-11 w-11"
-          >
-            <Plus className="w-4 h-4" />
-          </Button>
-        </div>
+            </>
+          )
+        })()}
       </div>
 
       {/* Recipe items list */}
@@ -212,6 +233,9 @@ function InlineIngredientForm({
           </Select>
         </div>
       </div>
+      <p className="text-[11px] text-muted-foreground">
+        Informe o tamanho e preço da embalagem comprada. Ex: 1 kg por R$ 5,00.
+      </p>
 
       <Button
         type="button"

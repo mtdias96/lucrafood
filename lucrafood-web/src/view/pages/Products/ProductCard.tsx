@@ -22,7 +22,7 @@ interface ProductCardProps {
   product: ProductWithFinancials
   onDelete: (productId: string) => void
   onEditRecipeItem: (productId: string, item: RecipeItem) => void
-  onRemoveRecipeItem: (productId: string, recipeItemId: string, ingredientName: string) => void
+  onRemoveRecipeItem: (productId: string, recipeItemId: string) => void
   onViewProfitHistory: (productId: string) => void
   isDeletingRecipeItem?: boolean
 }
@@ -86,7 +86,7 @@ export function ProductCard({
             <div className="flex items-center gap-1.5 mb-1">
               <DollarSign className="w-3 h-3 text-muted-foreground" />
               <span className="text-[11px] text-muted-foreground font-medium uppercase tracking-wide">
-                Custo
+                Custo/un
               </span>
             </div>
             <p className="text-sm font-semibold text-foreground">
@@ -98,7 +98,7 @@ export function ProductCard({
             <div className="flex items-center gap-1.5 mb-1">
               <DollarSign className="w-3 h-3 text-muted-foreground" />
               <span className="text-[11px] text-muted-foreground font-medium uppercase tracking-wide">
-                Venda
+                Venda/un
               </span>
             </div>
             <p className="text-sm font-semibold text-foreground">
@@ -126,7 +126,7 @@ export function ProductCard({
             <div className="flex items-center gap-1.5 mb-1">
               <DollarSign className="w-3 h-3 text-primary" />
               <span className="text-[11px] text-muted-foreground font-medium uppercase tracking-wide">
-                Custo total
+                Custo receita
               </span>
             </div>
             <p className="text-sm font-semibold text-foreground">
@@ -156,7 +156,7 @@ export function ProductCard({
             <div className="space-y-2">
               {product.items.slice(0, 5).map((item) => (
                 <div
-                  key={item.ingredientId}
+                  key={item.id}
                   className="group/item inline-flex items-center rounded-lg bg-secondary px-2 py-1 text-[11px] font-medium text-secondary-foreground hover:bg-secondary/80 transition-colors"
                 >
                   {item.ingredientName ?? 'Ingrediente'}
@@ -174,7 +174,7 @@ export function ProductCard({
                   <button
                     onClick={() =>
                       setConfirmDelete({
-                        recipeItemId: item.ingredientId,
+                        recipeItemId: item.id,
                         ingredientName: item.ingredientName || 'Ingrediente',
                       })
                     }
@@ -213,7 +213,7 @@ export function ProductCard({
                 </button>
                 <button
                   onClick={() => {
-                    onRemoveRecipeItem(product.id, confirmDelete.recipeItemId, confirmDelete.ingredientName)
+                    onRemoveRecipeItem(product.id, confirmDelete.recipeItemId)
                     setConfirmDelete(null)
                   }}
                   className="px-3 py-1 rounded text-sm font-medium bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-colors"

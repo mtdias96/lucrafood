@@ -17,6 +17,7 @@ export interface Product {
 }
 
 export interface RecipeItem {
+  id: string
   ingredientId: string
   ingredientName: string | null
   quantity: string

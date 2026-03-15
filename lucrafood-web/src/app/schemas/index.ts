@@ -8,7 +8,7 @@ export const packageUnitEnum = z.enum(['g', 'kg', 'ml', 'l', 'un'] as const)
 
 export const productSchema = z.object({
   name: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
-  yieldQty: z.number().min(1, 'Rendimento deve ser maior que 0'),
+  yieldQty: z.number().min(0.01, 'Rendimento deve ser maior que 0'),
   yieldUnit: packageUnitEnum,
 })
 

@@ -9,8 +9,8 @@ import { Label } from '@/view/components/ui'
 import { useUpdateRecipeItem } from '@/app/hooks/useUpdateRecipeItem'
 import { recipeItemSchema } from '@/app/schemas'
 import type { RecipeItemFormData } from '@/app/schemas'
-import type { RecipeItem } from '@/app/types/product'
-import { UNIT_OPTIONS } from '@/app/config/constants'
+import type { RecipeItem, PackageUnit } from '@/app/types/product'
+import { UNIT_OPTIONS, getCompatibleUnits } from '@/app/config/constants'
 import { getApiErrorMessage } from '@/app/utils/getApiErrorMessage'
 import toast from 'react-hot-toast'
 
@@ -40,6 +40,7 @@ export function EditRecipeItemModal({ open, onClose, productId, item }: EditReci
   })
 
   const unitUsed = watch('unitUsed')
+  const compatibleUnits = item ? getCompatibleUnits(item.unit as PackageUnit) : UNIT_OPTIONS
 
   const onSubmit = (data: RecipeItemFormData) => {
     if (!item) return
@@ -48,7 +49,7 @@ export function EditRecipeItemModal({ open, onClose, productId, item }: EditReci
     updateRecipeItem(
       {
         productId,
-        recipeItemId: item.ingredientId,
+        recipeItemId: item.id,
         recipeItem: data,
       },
       {
@@ -114,13 +115,16 @@ export function EditRecipeItemModal({ open, onClose, productId, item }: EditReci
           <div className="space-y-2">
             <Label htmlFor="unit">Unidade</Label>
             <Select {...register('unitUsed')} disabled={isPending}>
-              {UNIT_OPTIONS.map((option) => (
+              {compatibleUnits.map((option) => (
                 <option key={option.value} value={option.value}>
                   {option.label}
                 </option>
               ))}
             </Select>
             {errors.unitUsed && <p className="text-sm text-destructive">{errors.unitUsed.message}</p>}
+            <p className="text-xs text-muted-foreground">
+              Apenas unidades compatíveis com o tipo do ingrediente são exibidas.
+            </p>
           </div>
 
           <DialogFooter>

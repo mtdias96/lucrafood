@@ -9,6 +9,7 @@ import {
   ingredientSchema, type IngredientFormData,
 } from '@/app/schemas'
 import type { PackageUnit, RecipeIngredient } from '@/app/types/product'
+import { areUnitsCompatible } from '@/app/config/constants'
 import { getApiErrorMessage } from '@/app/utils/getApiErrorMessage'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQueryClient } from '@tanstack/react-query'
@@ -95,6 +96,13 @@ export function useCreateProductController(onSuccess: () => void) {
 
     if (recipeItems.some((item) => item.ingredientId === addItemForm.ingredientId)) {
       setApiError('Este ingrediente já foi adicionado na receita.')
+      return
+    }
+
+    if (!areUnitsCompatible(ingredient.baseUnit as PackageUnit, addItemForm.unitUsed)) {
+      setApiError(
+        `Unidade incompatível: "${addItemForm.unitUsed}" não é compatível com a unidade base "${ingredient.baseUnit}" do ingrediente. Use unidades do mesmo tipo (peso: g/kg, volume: ml/l, contagem: un).`,
+      )
       return
     }
 

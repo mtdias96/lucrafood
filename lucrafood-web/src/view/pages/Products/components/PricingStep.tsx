@@ -26,7 +26,7 @@ export function PricingStep({
       <div className="space-y-1.5">
         <Label htmlFor="sale-price" className="flex items-center gap-1.5">
           <DollarSign className="w-3.5 h-3.5 text-primary" />
-          Preço de venda (R$)
+          Preço de venda por unidade (R$)
         </Label>
         <Input
           id="sale-price"
@@ -40,6 +40,9 @@ export function PricingStep({
             {pricingForm.formState.errors.salePrice.message}
           </p>
         )}
+        <p className="text-xs text-muted-foreground">
+          Preço cobrado por cada unidade do rendimento informado no passo 1.
+        </p>
       </div>
 
       <div className="space-y-1.5">
