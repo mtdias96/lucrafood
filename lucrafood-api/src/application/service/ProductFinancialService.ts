@@ -17,11 +17,13 @@ export class ProductFinancialService {
 
       if (ingredientUnitPrice !== undefined) {
         const baseQty = UnitPriceService.toBaseQty(Number(item.quantity), item.unit as PackageUnit);
-        cost = Number((baseQty * ingredientUnitPrice).toFixed(2));
-        totalCost += cost;
+        const rawCost = baseQty * ingredientUnitPrice;
+        cost = Number(rawCost.toFixed(2));
+        totalCost += rawCost;
       }
 
       return {
+        id: item.id,
         ingredientId: item.ingredientId,
         ingredientName: item.ingredientName,
         quantity: item.quantity,
@@ -61,6 +63,7 @@ export namespace ProductFinancialService {
     salePrice: string;
     targetMargin?: string | null;
     items: Array<{
+      id: string;
       ingredientId: string;
       ingredientName: string | null;
       quantity: string;
@@ -70,6 +73,7 @@ export namespace ProductFinancialService {
 
   export type ProductFinancials = {
     items: Array<{
+      id: string;
       ingredientId: string;
       ingredientName: string | null;
       quantity: string;

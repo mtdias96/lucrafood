@@ -102,6 +102,7 @@ export class ProductRepository {
       targetMargin: product.targetMargin,
       createdAt: product.createdAt,
       items: recipeItems.map(item => ({
+        id: item.id,
         ingredientId: item.ingredientId,
         ingredientName: ingredientById.get(item.ingredientId)?.name ?? null,
         quantity: item.quantityUsed,
@@ -167,6 +168,7 @@ export class ProductRepository {
         targetMargin: p.targetMargin,
         createdAt: p.createdAt,
         items: items.map(item => ({
+          id: item.id,
           ingredientId: item.ingredientId,
           ingredientName: ingredientById.get(item.ingredientId)?.name ?? null,
           quantity: item.quantityUsed,
@@ -237,6 +239,7 @@ export class ProductRepository {
           targetMargin: p.targetMargin,
           createdAt: p.createdAt,
           items: items.map(item => ({
+            id: item.id,
             ingredientId: item.ingredientId,
             ingredientName: ingredientById.get(item.ingredientId)?.name ?? null,
             quantity: item.quantityUsed,
@@ -336,6 +339,7 @@ export namespace ProductRepository {
     targetMargin: string | null,
     createdAt: Date;
     items: Array<{
+      id: string;
       ingredientId: string;
       ingredientName: string | null;
       quantity: string;

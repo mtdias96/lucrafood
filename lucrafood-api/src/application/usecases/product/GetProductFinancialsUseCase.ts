@@ -66,6 +66,7 @@ export namespace GetProductFinancialsUseCase {
       targetMargin: number | null;
       createdAt: Date;
       items: Array<{
+        id: string;
         ingredientId: string;
         ingredientName: string | null;
         quantity: string;
