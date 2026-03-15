@@ -1,13 +1,14 @@
 import { useIngredient } from '@/app/hooks/useIngredient'
 import { formatCurrency } from '@/app/utils/formatters'
 import { Button, Card, CardContent, CardHeader, CardTitle } from '@/view/components/ui'
-import { ArrowLeft, Calendar, DollarSign, Minus, Store, TrendingDown, TrendingUp, LucideIcon } from 'lucide-react'
+import { ArrowLeft, Calendar, DollarSign, Minus, Store, TrendingDown, TrendingUp } from 'lucide-react'
 import { Link, useParams } from 'react-router-dom'
+import type { ElementType } from 'react'
 
 interface StatCardProps {
   title: string
   value: number
-  icon: LucideIcon
+  icon: ElementType
   colorClass?: string
   bgClass?: string
 }

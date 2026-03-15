@@ -8,6 +8,7 @@ export function useProductsController() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [editingRecipeItem, setEditingRecipeItem] = useState<{ productId: string; item: RecipeItem } | null>(null)
   const [profitHistoryProductId, setProfitHistoryProductId] = useState<string | null>(null)
+  const [deletingProductId, setDeletingProductId] = useState<string | null>(null)
 
   const { data, isLoading } = useProductsFinancials({ limit: 50 })
   const deleteProduct = useDeleteProduct()
@@ -25,10 +26,22 @@ export function useProductsController() {
 
   const handleDeleteProduct = useCallback(
     (productId: string) => {
+      setDeletingProductId(productId)
+    },
+    [],
+  )
+
+  const handleConfirmDeleteProduct = useCallback(
+    (productId: string) => {
       deleteProduct.mutate(productId)
+      setDeletingProductId(null)
     },
     [deleteProduct],
   )
+
+  const handleCancelDeleteProduct = useCallback(() => {
+    setDeletingProductId(null)
+  }, [])
 
   const handleEditRecipeItem = useCallback((productId: string, item: RecipeItem) => {
     setEditingRecipeItem({ productId, item })
@@ -63,6 +76,9 @@ export function useProductsController() {
     handleCloseCreateModal,
     handleDeleteProduct,
     isDeletingProduct: deleteProduct.isPending,
+    deletingProductId,
+    handleConfirmDeleteProduct,
+    handleCancelDeleteProduct,
     editingRecipeItem,
     handleEditRecipeItem,
     handleCloseEditRecipeItem,

@@ -10,6 +10,10 @@ interface ProductsViewProps {
   isLoading: boolean
   onOpenCreateModal: () => void
   onDeleteProduct: (productId: string) => void
+  deletingProductId: string | null
+  isDeletingProduct: boolean
+  onConfirmDeleteProduct: (productId: string) => void
+  onCancelDeleteProduct: () => void
   editingRecipeItem: { productId: string; item: RecipeItem } | null
   onEditRecipeItem: (productId: string, item: RecipeItem) => void
   onCloseEditRecipeItem: () => void
@@ -74,6 +78,10 @@ export function ProductsView({
   isLoading,
   onOpenCreateModal,
   onDeleteProduct,
+  deletingProductId,
+  isDeletingProduct,
+  onConfirmDeleteProduct,
+  onCancelDeleteProduct,
   editingRecipeItem,
   onEditRecipeItem,
   onCloseEditRecipeItem,
@@ -84,6 +92,7 @@ export function ProductsView({
   onCloseProfitHistory,
   currentProductName,
 }: ProductsViewProps) {
+  const deletingProduct = products.find((p) => p.id === deletingProductId)
   return (
     <div className="p-6 lg:p-8 max-w-7xl mx-auto">
       {/* Header */}
@@ -189,6 +198,34 @@ export function ProductsView({
         productId={profitHistoryProductId}
         productName={currentProductName}
       />
+
+      {/* Delete Product Confirmation Dialog */}
+      {deletingProductId && deletingProduct && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="rounded-lg bg-white p-6 shadow-lg dark:bg-slate-950 max-w-sm">
+            <h3 className="font-semibold text-foreground mb-2">Excluir produto?</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Tem certeza que deseja excluir <strong>{deletingProduct.name}</strong>? Esta ação não pode ser desfeita.
+            </p>
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={onCancelDeleteProduct}
+                className="px-3 py-1 rounded text-sm font-medium text-muted-foreground hover:bg-muted transition-colors"
+                disabled={isDeletingProduct}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => onConfirmDeleteProduct(deletingProductId)}
+                className="px-3 py-1 rounded text-sm font-medium bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-colors disabled:opacity-50"
+                disabled={isDeletingProduct}
+              >
+                {isDeletingProduct ? 'Excluindo...' : 'Excluir'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

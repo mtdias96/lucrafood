@@ -5,6 +5,11 @@ export function formatCurrency(value: number): string {
   }).format(value)
 }
 
+export function formatDate(date: string | Date): string {
+  const d = typeof date === 'string' ? new Date(date) : date
+  return d.toLocaleDateString('pt-BR')
+}
+
 export function getUnitLabel(unit: string): string {
   const map: Record<string, string> = {
     g: 'Gramas (g)',

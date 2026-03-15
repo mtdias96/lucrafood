@@ -10,6 +10,10 @@ export function ProductsPage() {
     handleOpenCreateModal,
     handleCloseCreateModal,
     handleDeleteProduct,
+    isDeletingProduct,
+    deletingProductId,
+    handleConfirmDeleteProduct,
+    handleCancelDeleteProduct,
     editingRecipeItem,
     handleEditRecipeItem,
     handleCloseEditRecipeItem,
@@ -28,6 +32,10 @@ export function ProductsPage() {
         isLoading={isLoading}
         onOpenCreateModal={handleOpenCreateModal}
         onDeleteProduct={handleDeleteProduct}
+        deletingProductId={deletingProductId}
+        isDeletingProduct={isDeletingProduct}
+        onConfirmDeleteProduct={handleConfirmDeleteProduct}
+        onCancelDeleteProduct={handleCancelDeleteProduct}
         editingRecipeItem={editingRecipeItem}
         onEditRecipeItem={handleEditRecipeItem}
         onCloseEditRecipeItem={handleCloseEditRecipeItem}
